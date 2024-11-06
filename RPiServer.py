@@ -19,7 +19,7 @@ print('Server is Up')
 
 messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
 messageReceived = messageReceived.decode('utf-8')
-print(f'The message is :\t{messageReceived}\nFrom : \t{clientAddress[0]}\nOn port number {clientAddress[1]}')
+print(f'The message is :\t{messageReceived}\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
 messageFromServer = 'Hello World From Server'
 messageFromServer_bytes = messageFromServer.encode('utf-8')
