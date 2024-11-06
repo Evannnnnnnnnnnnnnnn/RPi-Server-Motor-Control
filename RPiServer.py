@@ -9,7 +9,7 @@ import dotenv # pip install python-dotenv
 dotenv.load_dotenv()
 
 bufferSize = 1024
-serverPort = os.getenv('serverPort_env')
+serverPort = int(os.getenv('serverPort_env'))
 serverIP = os.getenv('serverIP_env')
 
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTP
