@@ -127,7 +127,7 @@ except KeyboardInterrupt:
     for action, i in action_to_idx.items() :
         print(f'{tracking[i]} for {action}')
 
-    messageFromClient = str(Done)
+    messageFromClient = 'Done'
     messageFromClient_bytes = messageFromClient.encode('utf-8')
     UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
@@ -145,7 +145,7 @@ except FileNotFoundError:
     for action, i in action_to_idx.items() :
         print(f'{tracking[i]} for {action}')
     
-    messageFromClient = str(Done)
+    messageFromClient = 'Done'
     messageFromClient_bytes = messageFromClient.encode('utf-8')
     UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
