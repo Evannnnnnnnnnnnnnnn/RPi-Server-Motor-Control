@@ -14,6 +14,9 @@ ADDR_MX_OPERATING_MODE = 11     # Adrdess of mode
 ENCODER_COUNTS_PER_REV = 4096   # Number of ticks (1 turn = 4096 ticks)
 # -------------------------
 
+LINE_UP = '\033[1A'
+LINE_CLEAR = '\x1b[2K'
+
 os_name = platform.system()
 if os_name == 'Linux' :
     os_port_name = '/dev/ttyUSB'
@@ -89,13 +92,19 @@ def move_motor(goalTurns):
             totalTurns += positionDifference
         previousPosition = currentPosition
 
-        print('\033[1A', end='\x1b[2K')
+        print(LINE_UP, end=LINE_CLEAR)
         print(f'Motor Position : {totalTurns:.2f}\tGoal Position : {goalTurns}')
 
         if round(totalTurns,2) == round(goalTurns,2) :
-            set_motor_speed(1)
+            set_motor_speed(0)
+            print(LINE_UP, end=LINE_CLEAR)
             packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
             done = True
+            if goalTurns < 0 :
+                direction = 'down'
+                goalTurns = goalTurns.replace('-','')
+            else : direction = 'up'
+            print (f'The motor went {direction} {goalTurns}')
         else :
             if goalTurns < 0 :
                 motor_speed = max(round((goalTurns-totalTurns)*1000), -400)
