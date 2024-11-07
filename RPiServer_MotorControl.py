@@ -195,7 +195,9 @@ try :
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
 except KeyboardInterrupt :
-    pass
+    messageFromServer = 'Done Received'
+    messageFromServer_bytes = messageFromServer.encode('utf-8')
+    RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
 print('Programme Stopped')
 

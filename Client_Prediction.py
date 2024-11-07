@@ -97,8 +97,8 @@ try :
                 predicted = torch.argmax(model(video_frames, imu_data))
                 tracking[predicted] += 1
 
-        message = f'{old_sample} : {idx_to_action.get(predicted.item())}'
-        print(message)
+        message = str({idx_to_action.get(predicted.item())})
+        print(f'{old_sample} : message')
         if first_sample == '' : first_sample = old_sample
 
         messageFromClient = str(message)
@@ -127,6 +127,10 @@ except KeyboardInterrupt:
     for action, i in action_to_idx.items() :
         print(f'{tracking[i]} for {action}')
 
+    messageFromClient = str(Done)
+    messageFromClient_bytes = messageFromClient.encode('utf-8')
+    UDPClient.sendto(messageFromClient_bytes, serverAddress)
+
 except FileNotFoundError:
     print("Samples folder got deleted")
     num_of_predictions = 0
@@ -140,6 +144,10 @@ except FileNotFoundError:
     print(f'\nThere were a total of {num_of_predictions} prediction{end_text}, with {(num_last-num_first+1)-num_of_predictions} missed')
     for action, i in action_to_idx.items() :
         print(f'{tracking[i]} for {action}')
+    
+    messageFromClient = str(Done)
+    messageFromClient_bytes = messageFromClient.encode('utf-8')
+    UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
 
 
