@@ -97,8 +97,8 @@ try :
                 predicted = torch.argmax(model(video_frames, imu_data))
                 tracking[predicted] += 1
 
-        message = str({idx_to_action.get(predicted.item())})
-        print(f'{old_sample} : message')
+        message = idx_to_action.get(predicted.item())
+        print(f'{old_sample} : {message}')
         if first_sample == '' : first_sample = old_sample
 
         messageFromClient = str(message)
