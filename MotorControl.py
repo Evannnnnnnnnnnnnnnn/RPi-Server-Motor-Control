@@ -26,10 +26,11 @@ else : sys.exit('Unsuported OS')
 for i in range(1000) :
     Serial_Connected = False
     try :
-        portHandler = PortHandler(f'COM{i}')
+        portHandler = PortHandler(f'{os_port_name}{i}')
+        
         portHandler.openPort()
         Serial_Connected = True
-        print(f"\033cSerial Connected at Port COM{i}")
+        print(f"\033cSerial Connected at Port {os_port_name}{i}")
         break
     except :
         pass
