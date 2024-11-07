@@ -41,7 +41,7 @@ if not Fixed_Serial_Port:
         os_port_name = '/dev/ttyUSB'
     elif os_name == 'Windows':
         os_port_name = 'COM'
-    elif os_name == 'Darwin':  # This is Mac os
+    elif os_name == 'Darwin':  # This is Mac OS
         os_port_name = '/dev/tty.usbserial-'
     else:
         sys.exit('Unsupported OS')
@@ -149,6 +149,8 @@ serverIP = os.getenv('serverIP_env')
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.bind((serverIP,serverPort))
 
+
+
 try :
     Done = False
     while not Done :
@@ -169,7 +171,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            # Motor activation
+            move_motor(1)
 
         elif messageReceived.lower() == 'walk' :
             messageFromServer = f'Walk Received'
@@ -183,7 +185,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            # Motor activation
+            move_motor(-1)
 
         else :
             messageFromServer = f'Unknown Message Received'
