@@ -1,5 +1,5 @@
 if __name__ == '__main__' :
-    print('\033cStarting ...\n')
+    print("\033cStarting ...\n") # Clear Terminal
 
 import time
 import sys
@@ -58,47 +58,52 @@ def read_motor_position(inTick = False):
             return dxl_present_position/ENCODER_COUNTS_PER_REV
 
 
+def move_motor(goalTurns):
+    done = False
+    packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
+    goalTurns = int(input('\nEnter the wanted turn number : '))
+    initialPosition = read_motor_position(inTick=False)
+    previousPosition = 0
+    totalTurns = 0
 
+    while not done :
+        #Set to wheel mode
+        packetHandler.write2ByteTxRx(portHandler, DXL_ID, 6, 0)   # Address of min value is 6
+        packetHandler.write2ByteTxRx(portHandler, DXL_ID, 8, 0)   # Address of max value is 8
 
+        currentPosition = read_motor_position(inTick=False) -initialPosition
+        positionDifference = (currentPosition - previousPosition) * 0.9
+        if positionDifference > 0.8 :
+            pass
+        elif positionDifference < -0.8 :
+            pass
+        else : 
+            totalTurns += positionDifference
+        previousPosition = currentPosition
 
+        print('\033[1A', end='\x1b[2K')
+        print(f'Motor Position : {totalTurns:.2f}\tGoal Position : {goalTurns}')
 
-try :
-    while True :
-        done = False
-        packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
-        goalTurns = int(input('\nEnter the wanted turn number : '))
-        initialPosition = read_motor_position(inTick=False)
-        previousPosition = 0
-        totalTurns = 0
-
-        while not done :
-            #Set to wheel mode
-            packetHandler.write2ByteTxRx(portHandler, DXL_ID, 6, 0)   # Address of min value is 6
-            packetHandler.write2ByteTxRx(portHandler, DXL_ID, 8, 0)   # Address of max value is 8
-
-            currentPosition = read_motor_position(inTick=False) -initialPosition
-            positionDifference = (currentPosition - previousPosition) * 0.9
-            if positionDifference > 0.8 :
-                pass
-            elif positionDifference < -0.8 :
-                pass
-            else : 
-                totalTurns += positionDifference
-            previousPosition = currentPosition
-
-            print('\033[1A', end='\x1b[2K')
-            print(f'Motor Position : {totalTurns:.2f}\tGoal Position : {goalTurns}')
-
-            if round(totalTurns,2) == round(goalTurns,2) :
-                set_motor_speed(1)
-                packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
-                done = True
+        if round(totalTurns,2) == round(goalTurns,2) :
+            set_motor_speed(1)
+            packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
+            done = True
+        else :
+            if goalTurns < 0 :
+                motor_speed = max(round((goalTurns-totalTurns)*1000), -400)
             else :
-                if goalTurns < 0 :
-                    motor_speed = max(round((goalTurns-totalTurns)*1000), -400)
-                else :
-                    motor_speed = min(round((goalTurns-totalTurns)*1000), 400)
-                set_motor_speed(motor_speed)
+                motor_speed = min(round((goalTurns-totalTurns)*1000), 400)
+            set_motor_speed(motor_speed)
 
-except KeyboardInterrupt :
-    print("Programm Stopped")
+
+move_motor(2)
+
+move_motor(-2)
+
+
+
+
+
+
+
+print("Programm Stopped")
