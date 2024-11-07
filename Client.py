@@ -27,6 +27,6 @@ UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
 dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
 dataReceived.decode('utf-8')
-print(f'The message is :\t{dataReceived}\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
+print(f'The message is :{dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
 
 
