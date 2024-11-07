@@ -1,3 +1,5 @@
+from Client import messageFromClient, messageFromClient_bytes
+
 if __name__ == "__main__" :
     print("\033cStarting ...\n") # Clear Terminal
 
@@ -22,11 +24,36 @@ RPi_Socket.bind((serverIP,serverPort))
 
 print('\033cServer is Up')
 
-messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
-messageReceived = messageReceived.decode('utf-8')
-print(f'The message is :{messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
+try :
+    Done = False
+    while not Done :
+        messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
+        messageReceived = messageReceived.decode('utf-8')
+        print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
-messageFromServer = 'Message Received !'
-messageFromServer_bytes = messageFromServer.encode('utf-8')
-RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+        if messageFromClient == 'Done' :
+            Done = True
+            messageFromServer = f'{messageFromClient} Received'
+            messageFromServer_bytes = messageFromServer.encode('utf-8')
+            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+
+        elif messageFromClient == 'grab' :
+            messageFromServer = f'{messageFromClient} Received'
+            messageFromServer_bytes = messageFromServer.encode('utf-8')
+            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+
+        elif messageFromClient == 'walk' :
+            messageFromServer = f'{messageFromClient} Received'
+            messageFromServer_bytes = messageFromServer.encode('utf-8')
+            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+
+        elif messageFromClient == 'down' :
+            messageFromServer = f'{messageFromClient} Received'
+            messageFromServer_bytes = messageFromServer.encode('utf-8')
+            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+
+except KeyboardInterrupt :
+    pass
+
+print('Programme Stopped')
 

@@ -20,13 +20,20 @@ serverAddress = (serverIP,serverPort)
 
 UDPClient = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
-messageFromClient = '0'
-messageFromClient_bytes = messageFromClient.encode('utf-8')
+try :
+    Done = False
+    while not Done :
+        messageFromClient = str(input('message to send : '))
+        messageFromClient_bytes = messageFromClient.encode('utf-8')
 
-UDPClient.sendto(messageFromClient_bytes, serverAddress)
+        UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
-dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
-dataReceived.decode('utf-8')
-print(f'The message is :{dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
+        dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
+        dataReceived = dataReceived.decode('utf-8')
+        print(f'The message is : {dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
+except KeyboardInterrupt :
+    pass
 
 
+
+print('Programme Stopped')
