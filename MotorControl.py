@@ -102,9 +102,9 @@ def move_motor(goalTurns):
             done = True
             if goalTurns < 0 :
                 direction = 'down'
-                goalTurns = goalTurns.replace('-','')
+                goalTurns = str(goalTurns).replace('-','')
             else : direction = 'up'
-            print (f'The motor went {direction} {goalTurns}')
+            print (f'The motor went {direction} {goalTurns} turn.')
         else :
             if goalTurns < 0 :
                 motor_speed = max(round((goalTurns-totalTurns)*1000), -400)
