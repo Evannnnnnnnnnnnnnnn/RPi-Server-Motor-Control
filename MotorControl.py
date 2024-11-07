@@ -71,7 +71,7 @@ def set_motor_speed(speed):
         speed = -speed | 1024  # bitwise OR 1020 for negative speed
     
     packetHandler.write2ByteTxRx(portHandler, DXL_ID, 32, speed)  # Address 32 is for speed control
-    #print(f'speed = {speed}')
+    #print(f'Speed = {speed}')
 
 def read_motor_position(inTick = False):
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION)
