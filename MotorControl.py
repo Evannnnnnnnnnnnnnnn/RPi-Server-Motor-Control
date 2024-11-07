@@ -3,43 +3,59 @@ if __name__ == '__main__' :
 
 import time
 import sys
-from dynamixel_sdk import *
 
+try :
+    from dynamixel_sdk import *
+except ModuleNotFoundError as Err :
+    sys.exit(f'No module named dynamixel_sdk try : pip install dynamixel-sdk')
+
+# -------------------------     # Modifiable variables
+Fixed_Serial_Port = False       # Set to True if you know the serial port you are connected
+Serial_Port = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 # -------------------------
+
+# -------------------------     # Dynamixel variables
 DXL_ID = 1                      # Dynamixel Motor ID
 BAUD_RATE = 57600               # Communication Baud Rate
 PROTOCOL_VERSION = 1.0          # Dynamixel Protocol version
 ADDR_MX_PRESENT_POSITION = 36   # Address of current position
-ADDR_MX_OPERATING_MODE = 11     # Adrdess of mode
 ENCODER_COUNTS_PER_REV = 4096   # Number of ticks (1 turn = 4096 ticks)
 # -------------------------
 
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
 
-os_name = platform.system()
-if os_name == 'Linux' :
-    os_port_name = '/dev/ttyUSB'
-elif os_name == 'Windows' :
-    os_port_name = 'COM'
-elif os_name == 'Darwin' : # This is Mac os
-    os_port_name = '/dev/tty.usbserial-'
-else : sys.exit('Unsuported OS')
+if not Fixed_Serial_Port :
+    os_name = platform.system()
+    if os_name == 'Linux' :
+        os_port_name = '/dev/ttyUSB'
+    elif os_name == 'Windows' :
+        os_port_name = 'COM'
+    elif os_name == 'Darwin' : # This is Mac os
+        os_port_name = '/dev/tty.usbserial-'
+    else : sys.exit('Unsupported OS')
 
-for i in range(1000) :
     Serial_Connected = False
+    for i in range(1000) :
+        try :
+            portHandler = PortHandler(f'{os_port_name}{i}')
+            portHandler.openPort()
+            Serial_Connected = True
+            print(f"\033cSerial Connected at Port {os_port_name}{i}")
+            break
+        except :
+            pass
+    if not Serial_Connected :
+        sys.exit("Serial not connected")
+else :
     try :
-        portHandler = PortHandler(f'{os_port_name}{i}')
-        
+        portHandler = PortHandler(Serial_Port)
         portHandler.openPort()
         Serial_Connected = True
-        print(f"\033cSerial Connected at Port {os_port_name}{i}")
-        break
+        print(f"\033cSerial Connected at Port {Serial_Port}")
     except :
-        pass
-
-if not Serial_Connected :
-    sys.exit("Serial Disconnected")
+        sys.exit('Serial not connected or wrong port name')
+        
 
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
@@ -52,7 +68,7 @@ else:
 
 def set_motor_speed(speed):
     if speed < 0:
-        speed = -speed | 1024  # bitwise OR for negative speed
+        speed = -speed | 1024  # bitwise OR 1020 for negative speed
     
     packetHandler.write2ByteTxRx(portHandler, DXL_ID, 32, speed)  # Address 32 is for speed control
     #print(f'speed = {speed}')
@@ -115,11 +131,11 @@ def move_motor(goalTurns):
 
 try :
     while True :
-        goal = int(input('Goal Turn : '))
+        goal = float(input('Goal Turn : '))
         move_motor(goal)
 except KeyboardInterrupt :
     pass
 except ValueError :
     print('Incorrect value')
 
-print("Programm Stopped")
+print("Programme Stopped")
