@@ -14,6 +14,14 @@ ADDR_MX_OPERATING_MODE = 11     # Adrdess of mode
 ENCODER_COUNTS_PER_REV = 4096   # Number of ticks (1 turn = 4096 ticks)
 # -------------------------
 
+os_name = platform.system()
+if os_name == 'Linux' :
+    os_port_name = '/dev/ttyUSB'
+elif os_name == 'Windows' :
+    os_port_name = 'COM'
+elif os_name == 'Darwin' : # This is Mac os
+    os_port_name = '/dev/tty.usbserial-'
+else : sys.exit('Unsuported OS')
 
 for i in range(1000) :
     Serial_Connected = False
