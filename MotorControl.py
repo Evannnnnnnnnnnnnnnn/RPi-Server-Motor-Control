@@ -70,7 +70,6 @@ def read_motor_position(inTick = False):
 def move_motor(goalTurns):
     done = False
     packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0) # Torque release
-    goalTurns = int(input('\nEnter the wanted turn number : '))
     initialPosition = read_motor_position(inTick=False)
     previousPosition = 0
     totalTurns = 0
@@ -105,14 +104,13 @@ def move_motor(goalTurns):
             set_motor_speed(motor_speed)
 
 
-move_motor(2)
-
-move_motor(-2)
-
-
-
-
-
-
+try :
+    while True :
+        goal = int(input('Goal Turn'))
+        move_motor(goal)
+except KeyboardInterrupt :
+    pass
+except ValueError :
+    print('Incorrect value')
 
 print("Programm Stopped")
