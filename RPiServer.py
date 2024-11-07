@@ -154,9 +154,10 @@ RPi_Socket.bind((serverIP,serverPort))
 try :
     Done = False
     while not Done :
-        print('\033cServer is Up')
+        print('Server is Up and waiting ...')
         messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
         messageReceived = messageReceived.decode('utf-8')
+        print(LINE_UP,end=LINE_CLEAR)
         print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
         if messageReceived.lower() == 'done' :
