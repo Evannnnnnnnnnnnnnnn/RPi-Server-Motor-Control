@@ -1,5 +1,3 @@
-from Client import messageFromClient, messageFromClient_bytes
-
 if __name__ == "__main__" :
     print("\033cStarting ...\n") # Clear Terminal
 
@@ -31,24 +29,24 @@ try :
         messageReceived = messageReceived.decode('utf-8')
         print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
-        if messageFromClient == 'Done' :
+        if messageReceived == 'Done' :
             Done = True
-            messageFromServer = f'{messageFromClient} Received'
+            messageFromServer = f'{messageReceived} Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-        elif messageFromClient == 'grab' :
-            messageFromServer = f'{messageFromClient} Received'
+        elif messageReceived == 'grab' :
+            messageFromServer = f'{messageReceived} Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-        elif messageFromClient == 'walk' :
-            messageFromServer = f'{messageFromClient} Received'
+        elif messageReceived == 'walk' :
+            messageFromServer = f'{messageReceived} Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-        elif messageFromClient == 'down' :
-            messageFromServer = f'{messageFromClient} Received'
+        elif messageReceived == 'down' :
+            messageFromServer = f'{messageReceived} Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
