@@ -76,7 +76,6 @@ model.eval()
 
 try :
     print(f'\033cProgramme running   ctrl + C to stop\n\nLoading {ModelName}\nUsing {device}\n')
-    Done = False
     old_sample = ''
     first_sample = ''
     for action in action_to_idx:
@@ -84,7 +83,7 @@ try :
     if not os.listdir(root_directory) :
         print('No files in root directory')
         sys.exit(0)
-    while not Done:
+    while True:
         while old_sample == dataset.SampleNumber :
             time.sleep(0.001)
             dataset = HAR_Inference_DataSet(root_dir=root_directory, transform=transform)
@@ -104,12 +103,6 @@ try :
         messageFromClient = str(message)
         messageFromClient_bytes = messageFromClient.encode('utf-8')
         UDPClient.sendto(messageFromClient_bytes, serverAddress)
-
-        dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
-        dataReceived = dataReceived.decode('utf-8')
-        print(f'Message From Server : {dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
-        if dataReceived == 'Done Received' :
-            Done = True
 
 
 

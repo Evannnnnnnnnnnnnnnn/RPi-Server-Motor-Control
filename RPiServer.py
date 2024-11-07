@@ -50,30 +50,19 @@ try :
             Done = True
 
         elif messageReceived.lower() == 'grab' :
-            messageFromServer = f'Grab Received'
-            messageFromServer_bytes = messageFromServer.encode('utf-8')
-            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
-
+            pass
             # move_motor(1)
 
         elif messageReceived.lower() == 'walk' :
-            messageFromServer = f'Walk Received'
-            messageFromServer_bytes = messageFromServer.encode('utf-8')
-            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
-
+            pass
             # Torque lock
 
         elif messageReceived.lower() == 'down' :
-            messageFromServer = f'Down Received'
-            messageFromServer_bytes = messageFromServer.encode('utf-8')
-            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
-
+            pass
             # move_motor(-1)
 
         else :
-            messageFromServer = f'Unknown Message Received'
-            messageFromServer_bytes = messageFromServer.encode('utf-8')
-            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+            sys.exit('Unknown Message Received')
 
 except KeyboardInterrupt :
     pass
