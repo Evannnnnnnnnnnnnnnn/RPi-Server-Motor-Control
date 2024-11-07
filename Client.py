@@ -7,9 +7,10 @@ import sys
 import os
 
 try :
-    import dotenv # pip install python-dotenv
-except ModuleNotFoundError:
-    sys.exit('No module named dotenv try : pip install python-dotenv')
+    import dotenv
+except ModuleNotFoundError :
+    sys.exit(f'No module named dotenv try : pip install python-dotenv')
+
 
 dotenv.load_dotenv()
 
@@ -30,7 +31,9 @@ try :
 
         dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
         dataReceived = dataReceived.decode('utf-8')
-        print(f'The message is : {dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
+        print(f'Message From Server : {dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
+        if dataReceived == 'Done Received' :
+            Done = True
 except KeyboardInterrupt :
     pass
 

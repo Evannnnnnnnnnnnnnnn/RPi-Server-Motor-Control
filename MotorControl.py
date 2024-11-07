@@ -128,14 +128,14 @@ def move_motor(goalTurns):
                 motor_speed = min(round((goalTurns-totalTurns)*1000), 400)
             set_motor_speed(motor_speed)
 
+if __name__ == '__main__' :
+    try :
+        while True :
+            goal = float(input('Goal Turn : '))
+            move_motor(goal)
+    except KeyboardInterrupt :
+        pass
+    except ValueError :
+        print('Incorrect value')
 
-try :
-    while True :
-        goal = float(input('Goal Turn : '))
-        move_motor(goal)
-except KeyboardInterrupt :
-    pass
-except ValueError :
-    print('Incorrect value')
-
-print("Programme Stopped")
+    print("Programme Stopped")
