@@ -153,6 +153,7 @@ RPi_Socket.bind((serverIP,serverPort))
 
 try :
     Done = False
+    print('\033c')
     while not Done :
         print('Server is Up and waiting ...')
         messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
