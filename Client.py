@@ -20,7 +20,7 @@ serverAddress = (serverIP,serverPort)
 
 UDPClient = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 
-messageFromClient = 'Hello World From Client'
+messageFromClient = '0'
 messageFromClient_bytes = messageFromClient.encode('utf-8')
 
 UDPClient.sendto(messageFromClient_bytes, serverAddress)
