@@ -43,7 +43,7 @@ packetHandler = PacketHandler(PROTOCOL_VERSION)
 
 # Set Baud Rate
 if portHandler.setBaudRate(BAUD_RATE):
-    print(f"Baud Rate fixed at {BAUD_RATE}")
+    print(f"Baud Rate fixed at {BAUD_RATE}\n")
 else:
     sys.exit("Could not configure Baud Rate")
 
@@ -106,7 +106,7 @@ def move_motor(goalTurns):
 
 try :
     while True :
-        goal = int(input('Goal Turn'))
+        goal = int(input('Goal Turn : '))
         move_motor(goal)
 except KeyboardInterrupt :
     pass
