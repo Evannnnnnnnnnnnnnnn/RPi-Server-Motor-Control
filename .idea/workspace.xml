@@ -5,8 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0fbee9ab-2010-41e6-8cd1-451844af50ed" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Client.py" beforeDir="false" afterPath="$PROJECT_DIR$/Client.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RPiServer.py" beforeDir="false" afterPath="$PROJECT_DIR$/RPiServer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

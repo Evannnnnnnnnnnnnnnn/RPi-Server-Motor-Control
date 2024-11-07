@@ -20,11 +20,10 @@ serverIP = os.getenv('serverIP_env')
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTP
 RPi_Socket.bind((serverIP,serverPort))
 
-print('\033cServer is Up')
-
 try :
     Done = False
     while not Done :
+        print('\033cServer is Up')
         messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
         messageReceived = messageReceived.decode('utf-8')
         print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
@@ -47,6 +46,11 @@ try :
 
         elif messageReceived == 'down' :
             messageFromServer = f'{messageReceived} Received'
+            messageFromServer_bytes = messageFromServer.encode('utf-8')
+            RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+
+        else :
+            messageFromServer = f'Unknown Message Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
