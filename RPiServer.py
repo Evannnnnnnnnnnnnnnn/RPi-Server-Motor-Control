@@ -18,6 +18,8 @@ except ModuleNotFoundError as Err:
     else:
         print(f'No module named {missing_module} try : pip install {missing_module}')
 
+test = True     # Set to True for debuging and testing
+
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
 
@@ -62,7 +64,10 @@ try :
             # move_motor(-1)
 
         else :
-            sys.exit('Unknown Message Received')
+            if test :
+                pass
+            else : 
+                sys.exit('Unknown Message Received')
 
 except KeyboardInterrupt :
     pass
