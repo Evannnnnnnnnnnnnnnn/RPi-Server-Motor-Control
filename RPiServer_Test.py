@@ -33,10 +33,9 @@ RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.bind((serverIP,serverPort))
 
 
-
 try :
     Done = False
-    print('\033c')
+    print('\033c',end='')
     while not Done :
         print('Server is Up and waiting ...')
         messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
