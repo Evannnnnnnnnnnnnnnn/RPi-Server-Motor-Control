@@ -36,4 +36,5 @@ except KeyboardInterrupt :
 
 
 
-print('Programme Stopped')
+if __name__ == "__main__" :
+    print('\nProgramme Stopped\n')

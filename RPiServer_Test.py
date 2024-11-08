@@ -72,5 +72,9 @@ try :
 except KeyboardInterrupt :
     pass
 
-print('\nProgramme Stopped\n')
 
+
+
+
+if __name__ == "__main__" :
+    print('\nProgramme Stopped\n')

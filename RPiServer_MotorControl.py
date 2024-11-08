@@ -199,5 +199,11 @@ except KeyboardInterrupt :
     messageFromServer_bytes = messageFromServer.encode('utf-8')
     RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-print('Programme Stopped')
 
+
+
+
+
+
+if __name__ == "__main__" :
+    print('\nProgramme Stopped\n')

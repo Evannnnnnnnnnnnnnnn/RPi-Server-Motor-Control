@@ -246,7 +246,6 @@ except KeyboardInterrupt :
                 os.remove(os.path.join(f'{root_directory}/{folders_left}', files_left))
             os.rmdir(f"{root_directory}/{folders_left}")
         os.rmdir(root_directory)
-    print('\nProgramme Stopped\n')
 
 
 # Release resources
@@ -257,3 +256,5 @@ for connection in connections:
     connection.close()
 
 
+if __name__ == "__main__" :
+    print('\nProgramme Stopped\n')
