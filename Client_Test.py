@@ -29,10 +29,7 @@ try :
 
         UDPClient.sendto(messageFromClient_bytes, serverAddress)
 
-        dataReceived ,serverAddressReceived = UDPClient.recvfrom(bufferSize)
-        dataReceived = dataReceived.decode('utf-8')
-        print(f'Message From Server : {dataReceived}')#\nFrom : \t\t\t{serverAddressReceived[0]}\nOn port number {serverAddressReceived[1]}')
-        if dataReceived == 'Done Received' :
+        if messageFromClient.lower() == 'done' :
             Done = True
 except KeyboardInterrupt :
     pass

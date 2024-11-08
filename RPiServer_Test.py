@@ -52,15 +52,15 @@ try :
             Done = True
 
         elif messageReceived.lower() == 'grab' :
-            pass
+            print('Grab')
             # move_motor(1)
 
         elif messageReceived.lower() == 'walk' :
-            pass
+            print('Walk')
             # Torque lock
 
         elif messageReceived.lower() == 'down' :
-            pass
+            print('Down')
             # move_motor(-1)
 
         else :
