@@ -143,8 +143,11 @@ def move_motor(goalTurns):
 dotenv.load_dotenv()
 
 bufferSize = 1024
-serverPort = int(os.getenv('serverPort_env'))
-serverIP = os.getenv('serverIP_env')
+try :
+    serverPort = int(os.getenv('serverPort_env'))
+    serverIP = os.getenv('serverIP_env')
+except TypeError :
+    sys.exit('Please open .env.shared and follow instructions')
 
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.bind((serverIP,serverPort))
