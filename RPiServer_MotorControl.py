@@ -54,7 +54,7 @@ if not Fixed_Serial_Port:
             Serial_Connected = True
             print(f"\033cSerial Connected at Port {os_port_name}{i}")
             break
-        except:
+        except :
             pass
     if not Serial_Connected:
         sys.exit("Serial not connected")
@@ -64,7 +64,7 @@ else:
         portHandler.openPort()
         Serial_Connected = True
         print(f"\033cSerial Connected at Port {Serial_Port}")
-    except:
+    except :
         sys.exit('Serial not connected or wrong port name')
 
 packetHandler = PacketHandler(PROTOCOL_VERSION)
@@ -87,9 +87,9 @@ def read_motor_position(inTick=False):
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read2ByteTxRx(portHandler, DXL_ID,
                                                                                    ADDR_MX_PRESENT_POSITION)
     if dxl_comm_result != COMM_SUCCESS:
-        print(f"COMM Error : {packetHandler.getTxRxResult(dxl_comm_result)}")
+        sys.exit(f"Serial Error : {packetHandler.getTxRxResult(dxl_comm_result)}")
     elif dxl_error != 0:
-        print(f"dxl Error : {packetHandler.getRxPacketError(dxl_error)}")
+        sys.exit(f"dxl Error : {packetHandler.getRxPacketError(dxl_error)}")
     else:
         if inTick:
             return dxl_present_position
@@ -125,7 +125,7 @@ def move_motor(goalTurns):
         if round(totalTurns, 2) == round(goalTurns, 2):
             set_motor_speed(0)
             print(LINE_UP, end=LINE_CLEAR)
-            packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0)  # Torque release
+            packetHandler.write1ByteTxRx(portHandler, DXL_ID, 64, 0)  # Torque release
             done = True
             if goalTurns < 0:
                 direction = 'down'
