@@ -30,6 +30,7 @@ DXL_ID = 1                      # Dynamixel Motor ID
 BAUD_RATE = 57600               # Communication Baud Rate
 PROTOCOL_VERSION = 1.0          # Dynamixel Protocol version
 ADDR_MX_PRESENT_POSITION = 36   # Address of current position
+ADDR_TORQUE = 64                # Address of torque activation
 ENCODER_COUNTS_PER_REV = 4096   # Number of ticks (1 turn = 4096 ticks)
 # -------------------------
 
@@ -100,7 +101,11 @@ def read_motor_position(inTick=False):
 
 def move_motor(goalTurns):
     done = False
-    packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_PRESENT_POSITION, 0)  # Torque release
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE, 0) # Torque release
+    if dxl_comm_result != COMM_SUCCESS:
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
     initialPosition = read_motor_position(inTick=False)
     previousPosition = 0
     totalTurns = 0
@@ -126,7 +131,7 @@ def move_motor(goalTurns):
         if round(totalTurns, 2) == round(goalTurns, 2):
             set_motor_speed(0)
             print(LINE_UP, end=LINE_CLEAR)
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 64, 0)
+            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE, 0) # Torque release
             if dxl_comm_result != COMM_SUCCESS:
                 print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
             elif dxl_error != 0:
@@ -203,9 +208,12 @@ try :
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
 except KeyboardInterrupt :
-    messageFromServer = 'Done Received'
-    messageFromServer_bytes = messageFromServer.encode('utf-8')
-    RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+    try :
+        messageFromServer = 'Done Received'
+        messageFromServer_bytes = messageFromServer.encode('utf-8')
+        RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
+    except NameError :
+                pass
 
 
 
