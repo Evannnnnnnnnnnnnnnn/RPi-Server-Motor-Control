@@ -207,13 +207,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-except KeyboardInterrupt :
-    try :
-        messageFromServer = 'Done Received'
-        messageFromServer_bytes = messageFromServer.encode('utf-8')
-        RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
-    except NameError :
-                pass
+except KeyboardInterrupt : pass
 
 
 
