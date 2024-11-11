@@ -30,7 +30,7 @@ DXL_ID = 1                      # Dynamixel Motor ID
 BAUD_RATE = 57600               # Communication Baud Rate
 PROTOCOL_VERSION = 1.0          # Dynamixel Protocol version
 ADDR_MX_PRESENT_POSITION = 36   # Address of current position
-ADDR_MX_TORQUE_ENABLE = 64      # Address of torque activation
+ADDR_MX_TORQUE_ENABLE = 24      # Address of torque activation
 ENCODER_COUNTS_PER_REV = 4096   # Number of ticks (1 turn = 4096 ticks)
 # -------------------------
 
@@ -139,12 +139,12 @@ def move_motor(goalTurns):
             print(LINE_UP, end=LINE_CLEAR)
             dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0) # Torque release
             if dxl_comm_result != COMM_SUCCESS:
-                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                print("1 %s" % packetHandler.getTxRxResult(dxl_comm_result))
             elif dxl_error != 0:
-                print("%s" % packetHandler.getRxPacketError(dxl_error))
+                print("2 %s" % packetHandler.getRxPacketError(dxl_error))
             else :
                 print('Torque Release')
-                
+
             done = True
             if goalTurns < 0:
                 direction = 'down'
