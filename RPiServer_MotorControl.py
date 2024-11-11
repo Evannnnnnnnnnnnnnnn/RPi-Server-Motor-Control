@@ -177,7 +177,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            move_motor(1)
+            move_motor(2)
 
         elif messageReceived.lower() == 'walk' :
             messageFromServer = f'Walk Received'
@@ -191,7 +191,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            move_motor(-1)
+            move_motor(-2)
 
         else :
             messageFromServer = f'Unknown Message Received'
