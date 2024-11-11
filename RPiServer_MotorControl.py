@@ -126,7 +126,11 @@ def move_motor(goalTurns):
         if round(totalTurns, 2) == round(goalTurns, 2):
             set_motor_speed(0)
             print(LINE_UP, end=LINE_CLEAR)
-            packetHandler.write1ByteTxRx(portHandler, DXL_ID, 64, 0)  # Torque release
+            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 64, 0)
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
             done = True
             if goalTurns < 0:
                 direction = 'down'
