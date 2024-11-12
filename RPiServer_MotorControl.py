@@ -78,7 +78,7 @@ else:
     sys.exit("Could not configure Baud Rate")
 
 
-def set_motor_speed(speed):
+def set_motor_speed(speed)-> None:
     if speed < 0:
         speed = -speed | 1024  # bitwise OR 1020 for negative speed
 
@@ -98,25 +98,26 @@ def read_motor_position(inTick=False):
         else:
             return dxl_present_position / ENCODER_COUNTS_PER_REV
 
+def torque_enable(val:int)-> None : # 0 is off, 1 is on
+    try :
+        if val > 1 or val < 0 :
+            raise ValueError
+        dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, val) # Torque release
+        if dxl_comm_result != COMM_SUCCESS:
+            print("1 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        elif dxl_error != 0:
+            print("2 %s" % packetHandler.getRxPacketError(dxl_error))
+    except ValueError :
+        sys.exit('Incorrect torque value')
 
 def move_motor(goalTurns):
     done = False
-
-    # Enable Dynamixel Torque
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 1)
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-    else:
-        print("Dynamixel has been successfully connected")
-
 
     initialPosition = read_motor_position(inTick=False)
     previousPosition = 0
     totalTurns = 0
 
-    while not done:
+    while not done :
         # Set to wheel mode
         packetHandler.write2ByteTxRx(portHandler, DXL_ID, 6, 0)  # Address of min value is 6
         packetHandler.write2ByteTxRx(portHandler, DXL_ID, 8, 0)  # Address of max value is 8
@@ -137,13 +138,6 @@ def move_motor(goalTurns):
         if round(totalTurns, 2) == round(goalTurns, 2):
             set_motor_speed(0)
             print(LINE_UP, end=LINE_CLEAR)
-            dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_MX_TORQUE_ENABLE, 0) # Torque release
-            if dxl_comm_result != COMM_SUCCESS:
-                print("1 %s" % packetHandler.getTxRxResult(dxl_comm_result))
-            elif dxl_error != 0:
-                print("2 %s" % packetHandler.getRxPacketError(dxl_error))
-            else :
-                print('Torque Release')
 
             done = True
             if goalTurns < 0:
@@ -202,7 +196,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            # Torque lock
+            torque_enable(1)
 
         elif messageReceived.lower() == 'down' :
             messageFromServer = f'Down Received'
@@ -210,6 +204,7 @@ try :
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
             move_motor(-1.5)
+            torque_enable(0)
 
         else :
             messageFromServer = f'Unknown Message Received'
