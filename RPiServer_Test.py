@@ -40,8 +40,8 @@ try :
         print('Server is Up and waiting ...')
         messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
         messageReceived = messageReceived.decode('utf-8')
-        print(LINE_UP,end=LINE_CLEAR)
-        print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
+        #print(LINE_UP,end=LINE_CLEAR)
+        #print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
         if messageReceived.lower() == 'done' :
             messageFromServer = 'Done Received'
