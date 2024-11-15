@@ -214,7 +214,7 @@ def back(total_revolutions):
         print(f"Révolutions mises à jour : {total_revolutions}, Position actuelle : {current_position}")
 
 
-        set_motor_speed(speed)  # Tourner dans le sens antihoraire
+        set_motor_speed(-speed)  # Tourner dans le sens antihoraire
         print("Tourne dans le sens antihoraire pour réduire les révolutions positives")
 
         # Condition d'arrêt si proche de la position de base
