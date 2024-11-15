@@ -56,19 +56,37 @@ previous_position = 0
 # -------------------------
 
 
-for i in range(1000) :
+if True:
+    os_name = platform.system()
+    if os_name == 'Linux':
+        os_port_name = '/dev/ttyUSB'
+    elif os_name == 'Windows':
+        os_port_name = 'COM'
+    elif os_name == 'Darwin':  # This is Mac OS
+        os_port_name = '/dev/tty.usbserial-'
+    else:
+        sys.exit('Unsupported OS')
+
     Serial_Connected = False
-    try :
-        portHandler = PortHandler(f'COM{i}')
+    for i in range(1000):
+        try:
+            portHandler = PortHandler(f'{os_port_name}{i}')
+            portHandler.openPort()
+            Serial_Connected = True
+            print(f"\033cSerial Connected at Port {os_port_name}{i}")
+            break
+        except :
+            pass
+    if not Serial_Connected:
+        sys.exit("Serial not connected")
+else:
+    try:
+        portHandler = PortHandler(Serial_Port)
         portHandler.openPort()
         Serial_Connected = True
-        print(f"\033cSerial Connected at Port COM{i}")
-        break
+        print(f"\033cSerial Connected at Port {Serial_Port}")
     except :
-        pass
-
-if not Serial_Connected :
-    sys.exit("Serial Disconnected")
+        sys.exit('Serial not connected or wrong port name')
 
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
