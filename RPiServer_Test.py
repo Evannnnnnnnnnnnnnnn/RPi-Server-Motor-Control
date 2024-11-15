@@ -136,10 +136,10 @@ def run_motor(value_tick_final):
 
     # Déterminez la direction du moteur
     if value_tick_final > 0:
-        set_motor_speed(-speed)
+        set_motor_speed(speed)
         print("Moteur tourne à gauche.")
     else:
-        set_motor_speed(speed)
+        set_motor_speed(-speed)
         print("Moteur tourne à droite.")
 
     global total_revolutions, previous_position
