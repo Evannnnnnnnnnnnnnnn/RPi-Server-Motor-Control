@@ -194,7 +194,7 @@ def back(total_revolutions):
 
 
 
-    speed = 100  # Vitesse par défaut
+    speed = 200  # Vitesse par défaut
     last_position = read_motor_position()  # Dernière position lue
 
     while True:
