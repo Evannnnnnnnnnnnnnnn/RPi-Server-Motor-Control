@@ -10,6 +10,7 @@ import time
 try :
     import dotenv
     from dynamixel_sdk import *
+    import matplotlib.pyplot as plt
 except ModuleNotFoundError as Err:
     missing_module = str(Err).replace('No module named ', '')
     missing_module = missing_module.replace("'", '')
@@ -146,6 +147,11 @@ def run_motor(value_tick_final):
     total_revolutions = 0
     previous_position = read_motor_position()
 
+    # Listes pour stocker les données de position et de temps
+    load = []  # Liste pour stocker les valeurs de position
+    times = []
+    start_time = time.time()  # Temps de début
+
 
     while True:
         current_position = read_motor_position()
@@ -177,6 +183,10 @@ def run_motor(value_tick_final):
         else:
             print("Erreur : impossible de lire la charge actuelle.")
 
+        # Enregistrer la position et le temps
+        current_time = time.time() - start_time
+        load.append(current_load)  # Ajouter la position actuelle à la liste
+        times.append(current_time)  # Ajouter le temps écoulé
 
         # Arrêt du moteur si le nombre de révolutions est atteint
         if total_revolutions >= value_tick_final:
@@ -185,7 +195,18 @@ def run_motor(value_tick_final):
             break
 
         previous_position = current_position
-        time.sleep(0.01)
+        #time.sleep(0.01)
+
+    # Tracer l'évolution de la position
+    load = load[1:]
+    times = times[1:]
+    plt.figure(figsize=(10, 5))
+    plt.plot(times, load, '.-', color='blue')
+    plt.title("Changes in motor load as a function of time")
+    plt.xlabel("Time (sec)")
+    plt.ylabel("Load")
+    plt.grid()
+    plt.show()   
         
 def back(total_revolutions):
     # Crée unhe copie locale de `total_revolutions`
