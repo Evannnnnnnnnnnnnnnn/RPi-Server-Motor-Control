@@ -135,7 +135,7 @@ def read_present_load():
 def run_motor(value_tick_final):
     speed = 200
     min_speed = 0  
-    load_threshold = 1500  # Seuil de charge pour réduire la vitesse
+    load_threshold = 1400  # Seuil de charge pour réduire la vitesse
 
     # Déterminez la direction du moteur
     if value_tick_final > 0:
