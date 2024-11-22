@@ -141,6 +141,10 @@ def Move_Tick(Tick:int)-> None :
             break
     DXL_Torque_Enable(0) # OFF
 
+def Hold() -> None :
+    DXL_Torque_Enable(1) 
+    DXL_Goal_Position(DXL_Present_Position(), In_Tick=True)
+
 if not Fixed_Serial_Port:
     os_name = platform.system()
     if os_name == 'Linux':
@@ -189,13 +193,6 @@ if dxl_comm_result != COMM_SUCCESS:
 elif dxl_error != 0:
     print("12 %s" % packetHandler.getRxPacketError(dxl_error))
 
-# Set the Current limitation
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 102, 30 & 1)
-if dxl_comm_result != COMM_SUCCESS:
-    print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("14 %s" % packetHandler.getRxPacketError(dxl_error))
-
 print('Programme Running, press ctrl + C to Stop\n')
 
 
@@ -203,9 +200,12 @@ print('Programme Running, press ctrl + C to Stop\n')
 try : 
     Done = False
     DXL_Torque_Enable(1)
-    Move_Tick(30000)
+    Move_Tick(3000)
     print(f"Starting Tick : {DXL_Present_Position()}")
-
+    Move_Turn(1)
+    Hold()
+    time.sleep(10)
+    Move_Turn(-1)
     print(f"End Tick : {DXL_Present_Position()}")
 except KeyboardInterrupt :
     pass
