@@ -22,7 +22,8 @@ Fixed_Serial_Port = False       # Set to True if you know the serial port you ar
 Serial_Port = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 # -------------------------
 
-# -------------------------     # Dynamixel variables
+# -------------------------     # Dynamixel variables for XM motor
+ADDR_OPERATING_MODE         = 11
 ADDR_TORQUE_ENABLE          = 64
 ADDR_LED                    = 65
 ADDR_GOAL_CURRENT           = 102
@@ -96,6 +97,12 @@ def DXL_Moving(addr=ADDR_MOVING)-> bool :
     time.sleep(0.5)
     return (dxl_moving & 1) == 1
 
+def DXL_Goal_Current(val:int, addr = ADDR_GOAL_CURRENT) -> None:
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("11 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("12 %s" % packetHandler.getRxPacketError(dxl_error))
 
 def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
     DXL_Torque_Enable(1) # ON
@@ -118,8 +125,9 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
         else:
             totalTurns += positionDifference
         previousPosition = currentPosition
-        print(round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2))
-        if not DXL_Moving() and time.time() - Start_Time > 1 :
+        Turn_Val = round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2)
+        print(Turn_Val)
+        if not DXL_Moving() and time.time() - Start_Time > 1 and Turn_Val == round(End_Turn,2):
             print(LINE_UP, end= LINE_CLEAR)
             if End_Turn >= 2 or End_Turn <= -2 :
                 end_text = "s"
@@ -141,9 +149,12 @@ def Move_Tick(Tick:int)-> None :
             break
     DXL_Torque_Enable(0) # OFF
 
-def Hold() -> None :
+def Hold(t:float, unHold=False) -> None : # t is time in s
     DXL_Torque_Enable(1) 
     DXL_Goal_Position(DXL_Present_Position(), In_Tick=True)
+    time.sleep(t)
+    if unHold :
+        DXL_Torque_Enable(0)
 
 if not Fixed_Serial_Port:
     os_name = platform.system()
@@ -187,11 +198,13 @@ else:
 
 DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
 # Set Current-based Position Control mode.
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 11, 5) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
+dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 5) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
 if dxl_comm_result != COMM_SUCCESS:
-    print("11 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
 elif dxl_error != 0:
-    print("12 %s" % packetHandler.getRxPacketError(dxl_error))
+    print("14 %s" % packetHandler.getRxPacketError(dxl_error))
+
+DXL_Goal_Current(30)
 
 print('Programme Running, press ctrl + C to Stop\n')
 
@@ -203,8 +216,7 @@ try :
     Move_Tick(3000)
     print(f"Starting Tick : {DXL_Present_Position()}")
     Move_Turn(1)
-    Hold()
-    time.sleep(10)
+    Hold(10, unHold=True)
     Move_Turn(-1)
     print(f"End Tick : {DXL_Present_Position()}")
 except KeyboardInterrupt :
