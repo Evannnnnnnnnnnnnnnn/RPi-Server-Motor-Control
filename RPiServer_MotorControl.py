@@ -25,7 +25,8 @@ Serial_Port = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this p
 Use_Current_IP = True           # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
 # -------------------------
 
-# -------------------------     # Dynamixel variables
+# -------------------------     # Dynamixel variables for XM motor
+ADDR_OPERATING_MODE         = 11
 ADDR_TORQUE_ENABLE          = 64
 ADDR_LED                    = 65
 ADDR_GOAL_CURRENT           = 102
@@ -36,7 +37,7 @@ DXL_MAXIMUM_POSITION_VALUE  = 4_095  # Refer to the Maximum Position Limit of pr
 BAUDRATE                    = 57_600
 PROTOCOL_VERSION            = 2.0
 DXL_ID                      = 1
-DXL_MAX_TICK                = 4_294_967_295
+DXL_MAX_TICK                = 4_294_967_296
 CURRENT_LIMIT               = 100
 # -------------------------
 
@@ -102,12 +103,19 @@ def DXL_Moving(addr=ADDR_MOVING)-> bool :
 def DXL_Goal_Current(val:int, addr = ADDR_GOAL_CURRENT) -> None:
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val)
     if dxl_comm_result != COMM_SUCCESS:
+        print("11 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("12 %s" % packetHandler.getRxPacketError(dxl_error))
+
+def DXL_Operating_Mode(val:int, addr = ADDR_OPERATING_MODE)-> None :
+    DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, val) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
+    if dxl_comm_result != COMM_SUCCESS:
         print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("14 %s" % packetHandler.getRxPacketError(dxl_error))
 
-
-def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
+def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False)-> None :
     DXL_Torque_Enable(1) # ON
     initial_position:int = DXL_Present_Position()
     previousPosition:int = 0
@@ -128,20 +136,26 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
         else:
             totalTurns += positionDifference
         previousPosition = currentPosition
-        print(round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2))
-        if not DXL_Moving() and time.time() - Start_Time > 1 :
+        Turn_Val = round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2)
+        print(Turn_Val)
+        if not DXL_Moving() and time.time() - Start_Time > 1 and Turn_Val == round(End_Turn,2):
             print(LINE_UP, end= LINE_CLEAR)
             if End_Turn >= 2 or End_Turn <= -2 :
                 end_text = "s"
             else : end_text = "" 
             print(f'Moved {End_Turn} turn{end_text}')
             break
-    DXL_Torque_Enable(0) # OFF
+    if Hold :
+        DXL_Torque_Enable(0) # OFF
 
-def Move_Tick(Tick:int)-> None :
+def Move_Tick(Tick:int, Hold=False)-> None :
     DXL_Torque_Enable(1) # ON
     DXL_Goal_Position(Tick, In_Tick=True)
     print("") #To cancel out the first line clear
+    if Tick < 0 :
+        Tick = DXL_MAX_TICK + Tick
+    elif Tick > DXL_MAX_TICK :
+        Tick = Tick - DXL_MAX_TICK
     while True :
         print(LINE_UP, end=LINE_CLEAR)
         print(DXL_Present_Position(), Tick)
@@ -149,7 +163,15 @@ def Move_Tick(Tick:int)-> None :
             print(LINE_UP, end=LINE_CLEAR)
             print(f"At Tick {DXL_Present_Position()}")
             break
-    DXL_Torque_Enable(0) # OFF
+    if Hold :
+        DXL_Torque_Enable(0) # OFF
+
+def Hold(t:float, unHold=False) -> None : # t is time in s
+    DXL_Torque_Enable(1) 
+    DXL_Goal_Position(DXL_Present_Position(), In_Tick=True)
+    time.sleep(t) # it will keep holding even if time is done, but as soon as you change goal position, it will stop holding
+    if unHold :
+        DXL_Torque_Enable(0)
 
 if not Fixed_Serial_Port:
     os_name = platform.system()
@@ -191,17 +213,13 @@ if portHandler.setBaudRate(BAUDRATE):
 else:
     sys.exit("Could not configure Baud Rate")
 
-DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
 # Set Current-based Position Control mode.
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, 11, 5) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
-if dxl_comm_result != COMM_SUCCESS:
-    print("11 %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("12 %s" % packetHandler.getRxPacketError(dxl_error))
+DXL_Operating_Mode(5)
 
 # Set the Current limitation
+#DXL_Goal_Current(30)
 
-
+#---------------------------------#
 
 dotenv.load_dotenv()
 
@@ -214,7 +232,6 @@ except TypeError :
 
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.bind((serverIP,serverPort))
-
 
 
 try :
@@ -239,23 +256,21 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(1.5)
-            DXL_Torque_Enable(1)
+            Move_Turn(1.5, Hold=True)
 
         elif messageReceived.lower() == 'walk' :
             messageFromServer = f'Walk Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            DXL_Torque_Enable(1)
+            Hold(2)
 
         elif messageReceived.lower() == 'down' :
             messageFromServer = f'Down Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(-1.5)
-            DXL_Torque_Enable(1)
+            Move_Turn(-1.5, Hold=True)
 
         else :
             messageFromServer = f'Unknown Message Received'

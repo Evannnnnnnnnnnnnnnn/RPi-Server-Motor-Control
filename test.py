@@ -34,7 +34,7 @@ DXL_MAXIMUM_POSITION_VALUE  = 4_095  # Refer to the Maximum Position Limit of pr
 BAUDRATE                    = 57_600
 PROTOCOL_VERSION            = 2.0
 DXL_ID                      = 1
-DXL_MAX_TICK                = 4_294_967_295
+DXL_MAX_TICK                = 4_294_967_296
 CURRENT_LIMIT               = 100
 # -------------------------
 
@@ -104,7 +104,15 @@ def DXL_Goal_Current(val:int, addr = ADDR_GOAL_CURRENT) -> None:
     elif dxl_error != 0:
         print("12 %s" % packetHandler.getRxPacketError(dxl_error))
 
-def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
+def DXL_Operating_Mode(val:int, addr = ADDR_OPERATING_MODE)-> None :
+    DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, val) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
+    if dxl_comm_result != COMM_SUCCESS:
+        print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("14 %s" % packetHandler.getRxPacketError(dxl_error))
+
+def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False)-> None :
     DXL_Torque_Enable(1) # ON
     initial_position:int = DXL_Present_Position()
     previousPosition:int = 0
@@ -134,12 +142,17 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE)-> None :
             else : end_text = "" 
             print(f'Moved {End_Turn} turn{end_text}')
             break
-    DXL_Torque_Enable(0) # OFF
+    if Hold :
+        DXL_Torque_Enable(0) # OFF
 
-def Move_Tick(Tick:int)-> None :
+def Move_Tick(Tick:int, Hold=False)-> None :
     DXL_Torque_Enable(1) # ON
     DXL_Goal_Position(Tick, In_Tick=True)
     print("") #To cancel out the first line clear
+    if Tick < 0 :
+        Tick = DXL_MAX_TICK + Tick
+    elif Tick > DXL_MAX_TICK :
+        Tick = Tick - DXL_MAX_TICK
     while True :
         print(LINE_UP, end=LINE_CLEAR)
         print(DXL_Present_Position(), Tick)
@@ -147,12 +160,13 @@ def Move_Tick(Tick:int)-> None :
             print(LINE_UP, end=LINE_CLEAR)
             print(f"At Tick {DXL_Present_Position()}")
             break
-    DXL_Torque_Enable(0) # OFF
+    if Hold :
+        DXL_Torque_Enable(0) # OFF
 
 def Hold(t:float, unHold=False) -> None : # t is time in s
     DXL_Torque_Enable(1) 
     DXL_Goal_Position(DXL_Present_Position(), In_Tick=True)
-    time.sleep(t)
+    time.sleep(t) # it will keep holding even if time is done, but as soon as you change goal position, it will stop holding
     if unHold :
         DXL_Torque_Enable(0)
 
@@ -196,28 +210,28 @@ if portHandler.setBaudRate(BAUDRATE):
 else:
     sys.exit("Could not configure Baud Rate")
 
-DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
 # Set Current-based Position Control mode.
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, 5) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
-if dxl_comm_result != COMM_SUCCESS:
-    print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("14 %s" % packetHandler.getRxPacketError(dxl_error))
+DXL_Operating_Mode(5)
 
-DXL_Goal_Current(30)
+#DXL_Goal_Current(30)
 
 print('Programme Running, press ctrl + C to Stop\n')
 
-
+Base_Tick = -1
+Grab_Tick = Base_Tick + 6000
+Down_Tick = Base_Tick - 6000
 
 try : 
     Done = False
     DXL_Torque_Enable(1)
-    Move_Tick(3000)
+    Move_Tick(Base_Tick)
     print(f"Starting Tick : {DXL_Present_Position()}")
-    Move_Turn(1)
-    Hold(10, unHold=True)
-    Move_Turn(-1)
+    Move_Tick(Grab_Tick)
+    print(f"Grab Tick : {DXL_Present_Position()}")
+    #Hold(3, unHold=True)
+    Move_Tick(Down_Tick)
+    print(f"Down Tick : {DXL_Present_Position()}")
+    Move_Tick(Base_Tick)
     print(f"End Tick : {DXL_Present_Position()}")
 except KeyboardInterrupt :
     pass
