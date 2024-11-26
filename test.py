@@ -45,6 +45,22 @@ CURRENT_LIMIT               = 100
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
 
+def two_s_complement (val:int, size=16)->int :
+    '''
+    val is the number we want to use in two_s_complement
+    size is the number of bits
+    '''
+    str_val = bin(val)[2:].zfill(size) # we make the number we got a string in base 2 with 16 bits
+    if str_val[0] == "1" :
+        new_bin = ""
+        for bit in str_val : 
+            if bit == "1" :
+                new_bin += "0"
+            else : new_bin += "1"
+        return (int(new_bin, 2)+1)*-1
+    else :
+        return val
+
 def DXL_Torque_Enable(val:int, addr=ADDR_TORQUE_ENABLE)-> None : # 0 is off, 1 is on
     try :
         if val > 1 or val < 0 :
@@ -71,8 +87,8 @@ def DXL_LED(val:int, addr=ADDR_LED)-> None : # 0 is off, 1 is on
 
 def DXL_Goal_Position(val:int, In_Tick = True, Turn_value = DXL_MAXIMUM_POSITION_VALUE, addr=ADDR_GOAL_POSITION )-> None : # On Dynamixel XM - 540, a turn is 4095
     try :
-        #if val > 1 or val < 0 :
-        #    raise ValueError
+        if val > 100000 or val < -100000 :
+           raise ValueError
         if In_Tick :
             dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, addr, val)
         else :
@@ -90,7 +106,7 @@ def DXL_Present_Position(addr=ADDR_PRESENT_POSITION)-> int :
         print("PRESENT POSITION COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("PRESENT POSITION DXL %s" % packetHandler.getRxPacketError(dxl_error))
-    return dxl_present_position
+    return two_s_complement(dxl_present_position)
 
 def DXL_Moving(addr=ADDR_MOVING)-> bool : 
     dxl_moving, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, addr)
@@ -102,6 +118,7 @@ def DXL_Moving(addr=ADDR_MOVING)-> bool :
     return (dxl_moving & 1) == 1
 
 def DXL_Goal_Current(val:int, addr = ADDR_GOAL_CURRENT) -> None:
+    raise NotImplementedError
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val)
     if dxl_comm_result != COMM_SUCCESS:
         print("GOAL CURRENT COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
@@ -117,6 +134,7 @@ def DXL_Operating_Mode(val:int, addr = ADDR_OPERATING_MODE)-> None :
         print("OPERATING MODE DXL %s" % packetHandler.getRxPacketError(dxl_error))
 
 def DXL_PID(P:int,I:int,D:int, addr_P = ADDR_POSITION_P_GAIN, addr_I = ADDR_POSITION_I_GAIN, addr_D = ADDR_POSITION_D_GAIN) -> None :
+    raise NotImplementedError
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr_P, P) 
     if dxl_comm_result != COMM_SUCCESS:
         print("P COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
@@ -139,8 +157,7 @@ def DXL_Present_Current(addr=ADDR_PRESENT_CURRENT)-> int :
         print("PRESENT CURRENT COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("PRESENT CURRENT DXL %s" % packetHandler.getRxPacketError(dxl_error))
-    return dxl_present_current
-
+    return two_s_complement(dxl_present_current % 2**16)
 
 def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False)-> None :
     DXL_Torque_Enable(1) # ON
@@ -251,12 +268,6 @@ Base_Tick = -1
 Grab_Tick = Base_Tick + 6000
 Down_Tick = Base_Tick - 6000
 
-def twos(val_str, bytes):
-    import sys
-    val = int(val_str, 2)
-    b = val.to_bytes(bytes, byteorder=sys.byteorder, signed=False)                                                          
-    return int.from_bytes(b, byteorder=sys.byteorder, signed=True)
-
 try : 
     '''Done = False
     DXL_Torque_Enable(1)
@@ -269,14 +280,18 @@ try :
     print(f"Down Tick : {DXL_Present_Position()}")
     Move_Tick(Base_Tick)
     print(f"End Tick : {DXL_Present_Position()}")'''
-    Hold(0)
+    DXL_Torque_Enable(1)
+    counter = 0
+    Start = time.time()
     while True :
-        print((DXL_Present_Current()))
+        counter += 1
+        print(DXL_Present_Current()) 
         print(LINE_UP,end=LINE_CLEAR)
 except KeyboardInterrupt :
-    pass
+    end = time.time() -Start
+    print(f'there were {counter} reads in {round(end, 2)}s\n{counter/end}rps')
 
-time.sleep(0.5)
+time.sleep(1)
 DXL_Torque_Enable(0)
 
 if __name__ == "__main__" :
