@@ -196,10 +196,6 @@ def Move_Tick(Tick:int, Hold=False)-> None :
     DXL_Torque_Enable(1) # ON
     DXL_Goal_Position(Tick, In_Tick=True)
     print("") #To cancel out the first line clear
-    if Tick < 0 :
-        Tick = DXL_MAX_TICK + Tick
-    elif Tick > DXL_MAX_TICK :
-        Tick = Tick - DXL_MAX_TICK
     while True :
         print(LINE_UP, end=LINE_CLEAR)
         print(DXL_Present_Position(), Tick)
@@ -269,27 +265,12 @@ Grab_Tick = Base_Tick + 6000
 Down_Tick = Base_Tick - 6000
 
 try : 
-    '''Done = False
+    Done = False
     DXL_Torque_Enable(1)
-    Move_Tick(Base_Tick)
-    print(f"Starting Tick : {DXL_Present_Position()}")
-    Move_Tick(Grab_Tick)
-    print(f"Grab Tick : {DXL_Present_Position()}")
-    #Hold(3, unHold=True)
-    Move_Tick(Down_Tick)
-    print(f"Down Tick : {DXL_Present_Position()}")
-    Move_Tick(Base_Tick)
-    print(f"End Tick : {DXL_Present_Position()}")'''
-    DXL_Torque_Enable(1)
-    counter = 0
-    Start = time.time()
-    while True :
-        counter += 1
-        print(DXL_Present_Current()) 
-        print(LINE_UP,end=LINE_CLEAR)
+    Move_Turn(1)
+    Move_Turn(-2)
 except KeyboardInterrupt :
-    end = time.time() -Start
-    print(f'there were {counter} reads in {round(end, 2)}s\n{counter/end}rps')
+    pass
 
 time.sleep(1)
 DXL_Torque_Enable(0)
