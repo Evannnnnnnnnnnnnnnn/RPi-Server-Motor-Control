@@ -180,7 +180,7 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = Fa
     initial_position:int = DXL_Present_Position()
     previousPosition:int = 0
     totalTurns:float = 0
-    print(f"init pos : {initial_position} Turn val : {Turn_value} End Turn : {End_Turn}")
+    #print(f"init pos : {initial_position} Turn val : {Turn_value} End Turn : {End_Turn}")
     end_goal:int = round(initial_position + Turn_value*End_Turn)
     DXL_Goal_Position(end_goal , In_Tick=True)
     if Message :
@@ -354,7 +354,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(Move_Turn, Hold=True)
+            Move_Turn(Move_Turn(), Hold=True)
 
         elif messageReceived.lower() == 'walk' :
             messageFromServer = f'Walk Received'
@@ -368,7 +368,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(-1*Move_Turn, Hold=True)
+            Move_Turn(-1*Move_Turn(), Hold=True)
 
         else :
             messageFromServer = f'Unknown Message Received'
