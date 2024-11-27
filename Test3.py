@@ -28,16 +28,14 @@ def count() :
 def worker() :
     while True :
         count()
+        time.sleep(0.1)
         if event.is_set() :
-            print(threading.current_thread().name)
+            print(f'{threading.current_thread().name} if off')
             break
 
 
 event = threading.Event()
-
-print("End")
-
-
+print(a)
 try :
     threading.Thread(target=worker).start()
     messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
