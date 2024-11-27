@@ -391,6 +391,7 @@ with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
 
 
 plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
+print("\nShowing Figure")
 plt.show()
 
 
