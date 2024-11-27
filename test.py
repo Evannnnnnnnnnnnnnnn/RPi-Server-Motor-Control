@@ -3,11 +3,13 @@ if __name__ == "__main__" :
 
 import threading
 import time
+import csv
 import sys
 import os
 
 try :
     from dynamixel_sdk import *
+    import matplotlib.pyplot as plt
 except ModuleNotFoundError as Err:
     missing_module = str(Err).replace('No module named ', '')
     missing_module = missing_module.replace("'", '')
@@ -43,6 +45,7 @@ CURRENT_LIMIT               = 100
 
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
+First_Time = time.time()
 
 def two_s_complement (val:int, size=16)->int :
     '''
@@ -158,59 +161,85 @@ def DXL_Present_Current(addr=ADDR_PRESENT_CURRENT)-> int :
         print("PRESENT CURRENT DXL %s" % packetHandler.getRxPacketError(dxl_error))
     return two_s_complement(dxl_present_current % 2**16)
 
-def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False)-> None :
+def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False, error = 20, Message = True)-> None :
+    '''
+    error is in tick, 4 095 tick is a turn
+    '''
     DXL_Torque_Enable(1) # ON
     initial_position:int = DXL_Present_Position()
     previousPosition:int = 0
     totalTurns:float = 0
     end_goal:int = round(initial_position + Turn_value*End_Turn)
     DXL_Goal_Position(end_goal , In_Tick=True)
-    Start_Time = time.time()
-    print("") #To cancel out the first line clear
+    if Message :
+        print("") #To cancel out the first line clear
 
     while True :
-        print(LINE_UP, end=LINE_CLEAR)
-        currentPosition = DXL_Present_Position() - initial_position
-        positionDifference = (currentPosition - previousPosition) 
-        if positionDifference > DXL_MAXIMUM_POSITION_VALUE:
-            pass
-        elif positionDifference < -DXL_MAXIMUM_POSITION_VALUE:
-            pass
-        else:
-            totalTurns += positionDifference
-        previousPosition = currentPosition
-        Turn_Val = round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2)
-        print(Turn_Val)
-        if not DXL_Moving() and time.time() - Start_Time > 1 and Turn_Val == round(End_Turn,2):
-            print(LINE_UP, end= LINE_CLEAR)
-            if End_Turn >= 2 or End_Turn <= -2 :
-                end_text = "s"
-            else : end_text = "" 
-            print(f'Moved {End_Turn} turn{end_text}')
+        if Message :
+            print(LINE_UP, end=LINE_CLEAR)
+            currentPosition = DXL_Present_Position() - initial_position
+            positionDifference = (currentPosition - previousPosition) 
+            if positionDifference > DXL_MAXIMUM_POSITION_VALUE:
+                pass
+            elif positionDifference < -DXL_MAXIMUM_POSITION_VALUE:
+                pass
+            else:
+                totalTurns += positionDifference
+            previousPosition = currentPosition
+            Turn_Val = round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2)
+            print(Turn_Val)
+        Mesure_Torque()
+        if not DXL_Moving() and (end_goal-error <= DXL_Present_Position() <= end_goal+error ):
+            if Message :
+                print(LINE_UP, end= LINE_CLEAR)
+                if End_Turn >= 2 or End_Turn <= -2 :
+                    end_text = "s"
+                else : end_text = "" 
+                print(f'Moved {End_Turn} turn{end_text}')
             break
     if not Hold :
         DXL_Torque_Enable(0) # OFF
 
-def Move_Tick(Tick:int, Hold=False)-> None :
+def Move_Tick(Tick:int, Hold=False, error=20, Message= True)-> None :
+    '''
+    error is in tick, 4 095 tick is a turn
+    '''
     DXL_Torque_Enable(1) # ON
     DXL_Goal_Position(Tick, In_Tick=True)
-    print("") #To cancel out the first line clear
+    if Message :
+        print("") #To cancel out the first line clear
     while True :
-        print(LINE_UP, end=LINE_CLEAR)
-        print(DXL_Present_Position(), Tick)
-        if not DXL_Moving() and DXL_Present_Position() == Tick :
+        if Message :
             print(LINE_UP, end=LINE_CLEAR)
-            print(f"At Tick {DXL_Present_Position()}")
+            print(DXL_Present_Position(), Tick)
+        Mesure_Torque()
+        if not DXL_Moving() and (Tick-error <= DXL_Present_Position() <= Tick+error ):
+            if Message :
+                print(LINE_UP, end=LINE_CLEAR)
+                print(f"At Tick {DXL_Present_Position()}")
             break
     if Hold :
         DXL_Torque_Enable(0) # OFF
 
 def Hold(t:float, unHold=False) -> None : # t is time in s
+    '''
+    It will keep holding even if time is done, but as soon as you change goal position, it will stop holding or if unHold is ste to True
+    '''
     DXL_Torque_Enable(1) 
     DXL_Goal_Position(DXL_Present_Position(), In_Tick=True)
-    time.sleep(t) # it will keep holding even if time is done, but as soon as you change goal position, it will stop holding
+    Start_Time = time.time()
+    while not time.time()-Start_Time >= t :
+        Mesure_Torque()
+        time.sleep(0.1)
     if unHold :
         DXL_Torque_Enable(0)
+
+def Mesure_Torque(Global_Time = False) -> None:
+    if Global_Time :
+        t = time.time()
+    else : t = time.time() - First_Time
+    Tracking_Current.append(DXL_Present_Current())
+    Tracking_Time.append(t)
 
 if not Fixed_Serial_Port:
     os_name = platform.system()
@@ -259,19 +288,31 @@ DXL_Operating_Mode(5)
 
 print('Programme Running, press ctrl + C to Stop\n')
 
-Base_Tick = -1
-Grab_Tick = Base_Tick + 6000
-Down_Tick = Base_Tick - 6000
+Tracking_Current = []
+Tracking_Time = []
 
 try : 
     DXL_Torque_Enable(1)
     #Move_Tick(0)
-    Move_Turn(-2.8, Hold=True)
+    Hold(10)
 except KeyboardInterrupt :
     pass
 
-time.sleep(1)
 #DXL_Torque_Enable(0)
+
+if len(Tracking_Current) == len(Tracking_Time): 
+    Tracking = []
+    for Current, Time in zip(Tracking_Time, Tracking_Current) :
+        Tracking.append((Current, Time))
+
+with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(("Time", "Current"))
+    csv_writer.writerows(Tracking)
+
+
+plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
+plt.show()
 
 if __name__ == "__main__" :
     print('\nProgramme Stopped\n')
