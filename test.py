@@ -38,7 +38,6 @@ DXL_MAXIMUM_POSITION_VALUE  = 4_095  # Refer to the Maximum Position Limit of pr
 BAUDRATE                    = 57_600
 PROTOCOL_VERSION            = 2.0
 DXL_ID                      = 1
-DXL_MAX_TICK                = 4_294_967_296
 CURRENT_LIMIT               = 100
 # -------------------------
 
@@ -265,8 +264,8 @@ Grab_Tick = Base_Tick + 6000
 Down_Tick = Base_Tick - 6000
 
 try : 
-    Done = False
     DXL_Torque_Enable(1)
+    Move_Tick(100)
     Move_Turn(1)
     Move_Turn(-2)
 except KeyboardInterrupt :
