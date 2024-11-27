@@ -1,14 +1,17 @@
 if __name__ == "__main__" :
     print("\033cStarting ...\n") # Clear Terminal
 
+import threading
 import socket
 import time
 import sys
+import csv
 import os
 
 try :
     import dotenv
     from dynamixel_sdk import *
+    import matplotlib.pyplot as plt
 except ModuleNotFoundError as Err:
     missing_module = str(Err).replace('No module named ', '')
     missing_module = missing_module.replace("'", '')
@@ -25,6 +28,7 @@ Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect t
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
 Error_Allowed       = 20                # in Tick
 Timeout_Time        = 60                # Time allowed to wait before shuting down connection in seconds
+Turn_Motor          = 2.5               # Number of turn for each actions
 # -------------------------
 
 # -------------------------     # Dynamixel variables for XM motor
@@ -52,6 +56,7 @@ LINE_CLEAR = '\x1b[2K'
 Tracking_Current = []
 Tracking_Time = []
 First_Time = time.time()
+Torque_threading_event = threading.Event()
 
 def two_s_complement (val:int, size=16)->int :
     '''
@@ -281,6 +286,15 @@ else:
 
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
+def worker() :
+    while True :
+        Mesure_Torque()
+        time.sleep(0.1)
+        if Torque_threading_event.is_set() :
+            print(f'{threading.current_thread().name} if off')
+            Torque_threading_event.clear()
+            break
+
 # Set Baud Rate
 if portHandler.setBaudRate(BAUDRATE):
     print(f"Baud Rate fixed at {BAUDRATE}\n")
@@ -305,17 +319,27 @@ except TypeError :
 
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.bind((serverIP,serverPort))
-
+RPi_Socket.settimeout(Timeout_Time)
 
 try :
     Done = False
     print('\033c',end='')
     while not Done :
+        threading.Thread(target=worker).start()
         print('Server is Up and waiting ...')
-        messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
+        try :
+            messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
+        except socket.timeout :
+            print(LINE_UP, end=LINE_CLEAR)
+            print('Server Timeout')
+            raise KeyboardInterrupt
         messageReceived = messageReceived.decode('utf-8')
         print(LINE_UP,end=LINE_CLEAR)
         print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
+
+        Torque_threading_event.set()
+        while Torque_threading_event.is_set():
+            time.sleep(0.01)
 
         if messageReceived.lower() == 'done' :
             messageFromServer = 'Done Received'
@@ -329,7 +353,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(2.5, Hold=True)
+            Move_Turn(Move_Turn, Hold=True)
 
         elif messageReceived.lower() == 'walk' :
             messageFromServer = f'Walk Received'
@@ -343,7 +367,7 @@ try :
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(-2.5, Hold=True)
+            Move_Turn(-1*Move_Turn, Hold=True)
 
         else :
             messageFromServer = f'Unknown Message Received'
@@ -352,9 +376,19 @@ try :
 
 except KeyboardInterrupt : pass
 
+if len(Tracking_Current) == len(Tracking_Time): 
+    Tracking = []
+    for Current, Time in zip(Tracking_Time, Tracking_Current) :
+        Tracking.append((Current, Time))
+
+with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
+    csv_writer = csv.writer(csv_file)
+    csv_writer.writerow(("Time", "Current"))
+    csv_writer.writerows(Tracking)
 
 
-
+plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
+plt.show()
 
 
 
