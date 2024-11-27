@@ -18,7 +18,7 @@ RPi_Socket.bind((serverIP,serverPort))
 
 try :
     messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
-except TimeoutError:
+except socket.timeout:
     print('Timeout')
 
 print('end')
