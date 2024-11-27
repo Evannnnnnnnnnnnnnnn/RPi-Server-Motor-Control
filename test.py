@@ -188,7 +188,7 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = Fa
             else : end_text = "" 
             print(f'Moved {End_Turn} turn{end_text}')
             break
-    if Hold :
+    if not Hold :
         DXL_Torque_Enable(0) # OFF
 
 def Move_Tick(Tick:int, Hold=False)-> None :
@@ -265,14 +265,13 @@ Down_Tick = Base_Tick - 6000
 
 try : 
     DXL_Torque_Enable(1)
-    Move_Tick(100)
-    Move_Turn(1)
-    Move_Turn(-2)
+    #Move_Tick(0)
+    Move_Turn(-2.8, Hold=True)
 except KeyboardInterrupt :
     pass
 
 time.sleep(1)
-DXL_Torque_Enable(0)
+#DXL_Torque_Enable(0)
 
 if __name__ == "__main__" :
     print('\nProgramme Stopped\n')

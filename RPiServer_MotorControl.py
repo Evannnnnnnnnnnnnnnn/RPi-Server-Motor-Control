@@ -29,20 +29,39 @@ Use_Current_IP = True           # Set to False if you want to use the IP in the 
 ADDR_OPERATING_MODE         = 11
 ADDR_TORQUE_ENABLE          = 64
 ADDR_LED                    = 65
+ADDR_POSITION_P_GAIN        = 80
+ADDR_POSITION_I_GAIN        = 82
+ADDR_POSITION_D_GAIN        = 84
 ADDR_GOAL_CURRENT           = 102
 ADDR_GOAL_POSITION          = 116
 ADDR_MOVING                 = 122
+ADDR_PRESENT_CURRENT        = 126
 ADDR_PRESENT_POSITION       = 132
 DXL_MAXIMUM_POSITION_VALUE  = 4_095  # Refer to the Maximum Position Limit of product eManual 4095
 BAUDRATE                    = 57_600
 PROTOCOL_VERSION            = 2.0
 DXL_ID                      = 1
-DXL_MAX_TICK                = 4_294_967_296
 CURRENT_LIMIT               = 100
 # -------------------------
 
 LINE_UP = '\033[1A'
 LINE_CLEAR = '\x1b[2K'
+
+def two_s_complement (val:int, size=16)->int :
+    '''
+    val is the number we want to use in two_s_complement
+    size is the number of bits
+    '''
+    str_val = bin(val)[2:].zfill(size) # we make the number we got a string in base 2 with 16 bits
+    if str_val[0] == "1" :
+        new_bin = ""
+        for bit in str_val : 
+            if bit == "1" :
+                new_bin += "0"
+            else : new_bin += "1"
+        return (int(new_bin, 2)+1)*-1
+    else :
+        return val
 
 def DXL_Torque_Enable(val:int, addr=ADDR_TORQUE_ENABLE)-> None : # 0 is off, 1 is on
     try :
@@ -50,9 +69,9 @@ def DXL_Torque_Enable(val:int, addr=ADDR_TORQUE_ENABLE)-> None : # 0 is off, 1 i
             raise ValueError
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val) # Torque release
         if dxl_comm_result != COMM_SUCCESS:
-            print("1 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+            print("TORQUE ENABLE COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
-            print("2 %s" % packetHandler.getRxPacketError(dxl_error))
+            print("TORQUE ENABLE DXL %s" % packetHandler.getRxPacketError(dxl_error))
     except ValueError :
         sys.exit('Incorrect torque value')
 
@@ -62,58 +81,85 @@ def DXL_LED(val:int, addr=ADDR_LED)-> None : # 0 is off, 1 is on
             raise ValueError
         dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val) # LED
         if dxl_comm_result != COMM_SUCCESS:
-            print("3 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+            print("LED COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
-            print("4 %s" % packetHandler.getRxPacketError(dxl_error))
+            print("LES DXL %s" % packetHandler.getRxPacketError(dxl_error))
     except ValueError :
         sys.exit('Incorrect LED value')
 
 def DXL_Goal_Position(val:int, In_Tick = True, Turn_value = DXL_MAXIMUM_POSITION_VALUE, addr=ADDR_GOAL_POSITION )-> None : # On Dynamixel XM - 540, a turn is 4095
     try :
-        #if val > 1 or val < 0 :
-        #    raise ValueError
+        if val > 100000 or val < -100000 :
+           raise ValueError
         if In_Tick :
             dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, addr, val)
         else :
             dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, addr, Turn_value*val)
         if dxl_comm_result != COMM_SUCCESS:
-            print("5 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+            print("GOAL POSITION COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
-            print("6 %s" % packetHandler.getRxPacketError(dxl_error))
+            print("GOAL POSITION DXL %s" % packetHandler.getRxPacketError(dxl_error))
     except ValueError :
         sys.exit('Incorrect Goal Position value')
 
 def DXL_Present_Position(addr=ADDR_PRESENT_POSITION)-> int :
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, addr)
     if dxl_comm_result != COMM_SUCCESS:
-        print("7 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        print("PRESENT POSITION COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
-        print("8 %s" % packetHandler.getRxPacketError(dxl_error))
-    return dxl_present_position
+        print("PRESENT POSITION DXL %s" % packetHandler.getRxPacketError(dxl_error))
+    return two_s_complement(dxl_present_position)
 
 def DXL_Moving(addr=ADDR_MOVING)-> bool : 
     dxl_moving, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, addr)
     if dxl_comm_result != COMM_SUCCESS:
-        print("9 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        print("MOVING COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
-        print("10 %s" % packetHandler.getRxPacketError(dxl_error))
+        print("MOVING DXL %s" % packetHandler.getRxPacketError(dxl_error))
     time.sleep(0.5)
     return (dxl_moving & 1) == 1
 
 def DXL_Goal_Current(val:int, addr = ADDR_GOAL_CURRENT) -> None:
+    raise NotImplementedError
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val)
     if dxl_comm_result != COMM_SUCCESS:
-        print("11 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        print("GOAL CURRENT COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
-        print("12 %s" % packetHandler.getRxPacketError(dxl_error))
+        print("GOAL CURRENT DXL %s" % packetHandler.getRxPacketError(dxl_error))
 
 def DXL_Operating_Mode(val:int, addr = ADDR_OPERATING_MODE)-> None :
     DXL_Torque_Enable(0) # Modifying EEPROM area value should be done before enabling DYNAMIXEL torque, So we disable it if it was left on for some reason
-    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, val) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr, val) # Address of Operating Mode : 11, Current-based Position Control mode value : 5
     if dxl_comm_result != COMM_SUCCESS:
-        print("13 %s" % packetHandler.getTxRxResult(dxl_comm_result))
+        print("OPERATING MODE COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
-        print("14 %s" % packetHandler.getRxPacketError(dxl_error))
+        print("OPERATING MODE DXL %s" % packetHandler.getRxPacketError(dxl_error))
+
+def DXL_PID(P:int,I:int,D:int, addr_P = ADDR_POSITION_P_GAIN, addr_I = ADDR_POSITION_I_GAIN, addr_D = ADDR_POSITION_D_GAIN) -> None :
+    raise NotImplementedError
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr_P, P) 
+    if dxl_comm_result != COMM_SUCCESS:
+        print("P COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("P DXL %s" % packetHandler.getRxPacketError(dxl_error))
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr_I, I) 
+    if dxl_comm_result != COMM_SUCCESS:
+        print("I COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("I DXL %s" % packetHandler.getRxPacketError(dxl_error))
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, addr_D, D) 
+    if dxl_comm_result != COMM_SUCCESS:
+        print("D COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("D DXL %s" % packetHandler.getRxPacketError(dxl_error))
+
+def DXL_Present_Current(addr=ADDR_PRESENT_CURRENT)-> int :
+    dxl_present_current, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, addr)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("PRESENT CURRENT COMM %s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("PRESENT CURRENT DXL %s" % packetHandler.getRxPacketError(dxl_error))
+    return two_s_complement(dxl_present_current % 2**16)
 
 def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False)-> None :
     DXL_Torque_Enable(1) # ON
@@ -145,17 +191,13 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = Fa
             else : end_text = "" 
             print(f'Moved {End_Turn} turn{end_text}')
             break
-    if Hold :
+    if not Hold :
         DXL_Torque_Enable(0) # OFF
 
 def Move_Tick(Tick:int, Hold=False)-> None :
     DXL_Torque_Enable(1) # ON
     DXL_Goal_Position(Tick, In_Tick=True)
     print("") #To cancel out the first line clear
-    if Tick < 0 :
-        Tick = DXL_MAX_TICK + Tick
-    elif Tick > DXL_MAX_TICK :
-        Tick = Tick - DXL_MAX_TICK
     while True :
         print(LINE_UP, end=LINE_CLEAR)
         print(DXL_Present_Position(), Tick)
@@ -215,9 +257,8 @@ else:
 
 # Set Current-based Position Control mode.
 DXL_Operating_Mode(5)
-
-# Set the Current limitation
-#DXL_Goal_Current(30)
+#DXL_PID (10,50,200)    Dose not work, error saying data length not good, commented, because if the error append, the default value is applied, so we set the values in dynamixel wizard 
+#DXL_Goal_Current(30)   Same error as PID
 
 #---------------------------------#
 
