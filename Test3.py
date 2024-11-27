@@ -3,7 +3,7 @@ import dotenv
 import os
 import sys
 
-bufferSize = 32
+bufferSize = 2
 
 dotenv.load_dotenv()
 
