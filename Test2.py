@@ -1,6 +1,5 @@
 import threading
 import time
-import socket
 print("\033cStart")
 a = 0
 

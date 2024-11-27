@@ -1,5 +1,7 @@
 import socket
 import dotenv
+import threading
+import time
 import os
 import sys
 
@@ -16,9 +18,33 @@ RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
 RPi_Socket.settimeout(3)
 RPi_Socket.bind((serverIP,serverPort))
 
+print("\033cStart")
+a = 0
+
+def count() :
+    global a
+    a +=1
+    
+def worker() :
+    while True :
+        count()
+        if event.is_set() :
+            print(threading.current_thread().name)
+            break
+
+
+event = threading.Event()
+
+print("End")
+
+
 try :
+    threading.Thread(target=worker).start()
     messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
 except socket.timeout:
     print('Timeout')
 
+event.set()
+time.sleep(1)
+print(a)
 print('end')
