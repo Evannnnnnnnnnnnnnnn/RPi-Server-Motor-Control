@@ -345,7 +345,7 @@ try :
             messageFromServer = 'Done Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
-
+            DXL_Torque_Enable(0) # OFF
             Done = True
 
         elif messageReceived.lower() == 'grab' :
@@ -376,6 +376,8 @@ try :
 
 except KeyboardInterrupt : pass
 
+DXL_Torque_Enable(0) # OFF
+
 if len(Tracking_Current) == len(Tracking_Time): 
     Tracking = []
     for Current, Time in zip(Tracking_Time, Tracking_Current) :
@@ -389,7 +391,6 @@ with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
 
 plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
 plt.show()
-
 
 
 if __name__ == "__main__" :
