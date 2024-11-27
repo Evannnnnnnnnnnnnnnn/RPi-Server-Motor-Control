@@ -31,6 +31,7 @@ def worker() :
         time.sleep(0.1)
         if event.is_set() :
             print(f'{threading.current_thread().name} if off')
+            event.clear()
             break
 
 
@@ -43,6 +44,7 @@ except socket.timeout:
     print('Timeout')
 
 event.set()
-time.sleep(1)
+while event.is_set():
+    time.sleep(0.1)
 print(a)
 print('end')
