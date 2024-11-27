@@ -3,7 +3,8 @@ import dotenv
 import os
 import sys
 
-bufferSize = 2
+bufferSize = 1024
+
 
 dotenv.load_dotenv()
 
@@ -15,6 +16,7 @@ except TypeError :
     sys.exit('\033cPlease open .env.shared and follow instructions')
 
 RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
+RPi_Socket.settimeout(10)
 RPi_Socket.bind((serverIP,serverPort))
 
 messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)

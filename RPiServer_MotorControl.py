@@ -24,6 +24,7 @@ Fixed_Serial_Port   = False             # Set to True if you know the serial por
 Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
 Error_Allowed       = 20                # in Tick
+Timeout_Time        =                   # Time allowed to wait before shuting down connection
 # -------------------------
 
 # -------------------------     # Dynamixel variables for XM motor
