@@ -339,7 +339,7 @@ try :
 
         Torque_threading_event.set()
         while Torque_threading_event.is_set():
-            time.sleep(0.01)
+            time.sleep(0.1)
 
         if messageReceived.lower() == 'done' :
             messageFromServer = 'Done Received'
