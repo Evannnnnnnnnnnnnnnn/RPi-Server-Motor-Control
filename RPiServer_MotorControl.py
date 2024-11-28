@@ -355,25 +355,28 @@ try :
             Done = True
 
         elif messageReceived.lower() == 'grab' :
+            Move_Turn(Turn_Motor, Hold=True)
+
             messageFromServer = f'Grab Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(Turn_Motor, Hold=True)
 
         elif messageReceived.lower() == 'walk' :
+            Hold(2)
+
             messageFromServer = f'Walk Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Hold(2)
 
         elif messageReceived.lower() == 'down' :
+            Move_Turn(-1*Turn_Motor, Hold=True)
+
             messageFromServer = f'Down Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
             RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 
-            Move_Turn(-1*Turn_Motor, Hold=True)
 
         else :
             messageFromServer = f'Unknown Message Received'
