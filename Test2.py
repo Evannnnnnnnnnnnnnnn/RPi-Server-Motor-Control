@@ -28,11 +28,11 @@ RPi_Socket.sendto(messageFromServer_bytes, clientAddress)
 while True : 
     print("Waiting for response from server")
     a, clientAddress = RPi_Socket.recvfrom(bufferSize)
-    a.decode('utf-8')
+    a = int(a.decode('utf-8'))
     print(LINE_UP, end=LINE_CLEAR)
     print(f"Received {a}")
     a+=1
-    messageFromClient = a
+    messageFromClient = str(a)
     messageFromClient_bytes = messageFromClient.encode('utf-8')
     RPi_Socket.sendto(messageFromClient_bytes, clientAddress)     
     print (f"Sent {a}")
