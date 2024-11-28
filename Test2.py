@@ -1,29 +1,22 @@
-import threading
-import time
 print("\033cStart")
-a = 0
 
-def count() :
-    global a
-    a +=1
-    
-def worker() :
-    while True :
-        count()
-        if event.is_set() :
-            print(threading.current_thread().name)
-            break
+import math
+
+angle = math.radians(60)
+forearm = 20
+arm = 50
+
+cable = math.sin(angle)*(forearm/math.sin(math.atan(forearm/arm)))
+
+print(cable)
 
 
-event = threading.Event()
-print(threading.current_thread().name)
 
 
-for i in range (10000):
-    event.clear()
-    threading.Thread(target=worker).start()
-    event.set()
-    time.sleep(0.01)
+
+
+
+
 
 
 print("End")

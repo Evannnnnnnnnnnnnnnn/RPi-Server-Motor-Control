@@ -390,9 +390,9 @@ with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer.writerows(Tracking)
 
 
-plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
-print("\nShowing Figure")
-plt.show()
+# plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
+# print("\nShowing Figure")
+# plt.show()
 
 
 if __name__ == "__main__" :
