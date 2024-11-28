@@ -26,9 +26,10 @@ except ModuleNotFoundError as Err:
 Fixed_Serial_Port   = False             # Set to True if you know the serial port you are connected
 Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
-Error_Allowed       = 20                # in Tick
+Error_Allowed       = 300                # in Tick
 Timeout_Time        = 60                # Time allowed to wait before shuting down connection in seconds
 Turn_Motor          = 2.5               # Number of turn for each actions
+CSV_Name            = "Test"            # Without .csv
 # -------------------------
 
 # -------------------------     # Dynamixel variables for XM motor
@@ -385,7 +386,7 @@ if len(Tracking_Current) == len(Tracking_Time):
         Tracking.append((Current, Time))
 else : print ("Error in Tracking")
 
-with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
+with open(CSV_Name+".csv", 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(("Time", "Current"))
     csv_writer.writerows(Tracking)
