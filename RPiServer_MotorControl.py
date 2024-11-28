@@ -26,7 +26,7 @@ except ModuleNotFoundError as Err:
 Fixed_Serial_Port   = False             # Set to True if you know the serial port you are connected
 Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
-Error_Allowed       = 300                # in Tick
+Error_Allowed       = 900                # in Tick
 Timeout_Time        = 60                # Time allowed to wait before shuting down connection in seconds
 Turn_Motor          = 2.5               # Number of turn for each actions
 CSV_Name            = "Test"            # Without .csv
