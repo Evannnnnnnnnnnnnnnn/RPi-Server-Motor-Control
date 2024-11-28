@@ -320,7 +320,7 @@ try :
 except TypeError :
     sys.exit('\033cPlease open .env.shared and follow instructions')
 
-RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTPy
+RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTP
 RPi_Socket.bind((serverIP,serverPort))
 RPi_Socket.settimeout(Timeout_Time)
 
