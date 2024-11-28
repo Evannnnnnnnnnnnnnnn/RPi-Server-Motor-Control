@@ -26,7 +26,7 @@ except ModuleNotFoundError as Err:
 Fixed_Serial_Port   = False             # Set to True if you know the serial port you are connected
 Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect to this port
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
-Error_Allowed       = 900                # in Tick
+Error_Allowed       = 300                # in Tick
 Timeout_Time        = 60                # Time allowed to wait before shuting down connection in seconds
 Turn_Motor          = 2.5               # Number of turn for each actions
 CSV_Name            = "Test"            # Without .csv
@@ -173,7 +173,7 @@ def DXL_Present_Current(addr=ADDR_PRESENT_CURRENT)-> int :
         print("PRESENT CURRENT DXL %s" % packetHandler.getRxPacketError(dxl_error))
     return two_s_complement(dxl_present_current % 2**16)
 
-def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False, error = 20, Message = True)-> None :
+def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = False, error = Error_Allowed, Message = True)-> None :
     '''
     error is in tick, 4 095 tick is a turn
     '''
@@ -213,7 +213,7 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = Fa
     if not Hold :
         DXL_Torque_Enable(0) # OFF
 
-def Move_Tick(Tick:int, Hold=False, error=20, Message= True)-> None :
+def Move_Tick(Tick:int, Hold=False, error=Error_Allowed , Message= True)-> None :
     '''
     error is in tick, 4 095 tick is a turn
     '''
