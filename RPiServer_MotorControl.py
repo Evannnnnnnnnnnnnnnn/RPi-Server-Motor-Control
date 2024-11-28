@@ -383,6 +383,7 @@ if len(Tracking_Current) == len(Tracking_Time):
     Tracking = []
     for Current, Time in zip(Tracking_Time, Tracking_Current) :
         Tracking.append((Current, Time))
+else : print ("Error in Tracking")
 
 with open('Test.csv', 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer = csv.writer(csv_file)
