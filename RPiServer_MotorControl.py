@@ -201,7 +201,7 @@ def Move_Turn(End_Turn:float, Turn_value = DXL_MAXIMUM_POSITION_VALUE, Hold = Fa
                 totalTurns += positionDifference
             previousPosition = currentPosition
             Turn_Val = round(totalTurns/DXL_MAXIMUM_POSITION_VALUE,2)
-            print(Turn_Val)
+            print(end_goal, DXL_Present_Position())
         Mesure_Torque()
         if not DXL_Moving() and (end_goal-error <= DXL_Present_Position() <= end_goal+error ):
             if Message :
