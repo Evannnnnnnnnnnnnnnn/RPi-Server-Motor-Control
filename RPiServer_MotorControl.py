@@ -57,7 +57,6 @@ LINE_CLEAR = '\x1b[2K'
 
 Tracking_Current = []
 Tracking_Time = []
-First_Time = time.time()
 Torque_threading_event = threading.Event()
 
 def two_s_complement (val:int, size=16)->int :
@@ -326,6 +325,20 @@ RPi_Socket.settimeout(Timeout_Time)
 
 if Ask_CSV_Name :
     CSV_Name = str(input("CSV Name : "))
+
+print('Server is Up and waiting for Ready Signal ...')
+try :
+    messageReceived, clientAddress = RPi_Socket.recvfrom(bufferSize)
+except socket.timeout :
+    print(LINE_UP, end=LINE_CLEAR)
+    print('Server Timeout')
+    raise KeyboardInterrupt
+
+TimeReceived = float(messageReceived.decode('utf-8'))
+
+First_Time = time.time()
+print(f'Delay is {round(TimeReceived - First_Time, 2)}s')
+
 
 try :
     Done = False
