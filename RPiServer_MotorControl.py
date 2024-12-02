@@ -28,7 +28,7 @@ Serial_Port         = '/dev/ttyUSB0'    # If Fixed_Serial_Port is True connect t
 Use_Current_IP      = True              # Set to False if you want to use the IP in the .env file   #TODO Finish the implementation of fixed IP
 Error_Allowed       = 300               # in Tick
 Timeout_Time        = 120               # Time allowed to wait before shuting down connection in seconds
-Turn_Motor          = 2.5               # Number of turn for each actions
+Turn_Motor          = 2.8               # Number of turn for each actions
 Ask_CSV_Name        = True              # If True will ask for the name of the csv where the torque data is stored
 CSV_Name            = "Test"            # Without .csv
 # -------------------------
