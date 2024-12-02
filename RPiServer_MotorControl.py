@@ -323,8 +323,12 @@ RPi_Socket = socket.socket(socket.AF_INET,socket.SOCK_DGRAM) # Using UTP
 RPi_Socket.bind((serverIP,serverPort))
 RPi_Socket.settimeout(Timeout_Time)
 
-if Ask_CSV_Name :
-    CSV_Name = str(input("CSV Name : "))
+try :
+    if Ask_CSV_Name :
+        CSV_Name = str(input("CSV Name : "))
+except KeyboardInterrupt :
+    sys.exit(0,'Programme Stopped')
+
 
 print('Server is Up and waiting for Ready Signal ...')
 try :
@@ -354,7 +358,7 @@ try :
             raise KeyboardInterrupt
         messageReceived = messageReceived.decode('utf-8')
         print(LINE_UP,end=LINE_CLEAR)
-        print(f'The message is : {messageReceived}')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
+        print(f'The message is : {messageReceived} at {round(time.time()-First_Time,2)}s')#\nFrom : \t\t\t{clientAddress[0]}\nOn port number {clientAddress[1]}')
 
         Torque_threading_event.set()
         while Torque_threading_event.is_set():
