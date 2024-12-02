@@ -347,6 +347,7 @@ First_Time = time.time()
 try :
     Done = False
     print('\033c',end='')
+    print(TimeReceived)
     print(f'Delay is {round(TimeReceived - First_Time, 2)}s\n')
     while not Done :
         threading.Thread(target=worker).start()
