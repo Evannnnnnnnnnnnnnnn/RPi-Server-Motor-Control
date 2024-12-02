@@ -327,7 +327,7 @@ try :
     if Ask_CSV_Name :
         CSV_Name = str(input("CSV Name : "))
 except KeyboardInterrupt :
-    sys.exit(0,'Programme Stopped')
+    sys.exit('\nProgramme Stopped\n')
 
 
 print('Server is Up and waiting for Ready Signal ...')
@@ -341,12 +341,13 @@ except socket.timeout :
 TimeReceived = float(messageReceived.decode('utf-8'))
 
 First_Time = time.time()
-print(f'Delay is {round(TimeReceived - First_Time, 2)}s')
+
 
 
 try :
     Done = False
     print('\033c',end='')
+    print(f'Delay is {round(TimeReceived - First_Time, 2)}s\n')
     while not Done :
         threading.Thread(target=worker).start()
         print('Server is Up and waiting ...')
