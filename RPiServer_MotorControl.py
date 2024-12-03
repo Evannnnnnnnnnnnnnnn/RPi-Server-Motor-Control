@@ -411,7 +411,7 @@ if len(Tracking_Current) == len(Tracking_Time):
         Tracking.append((Current, Time))
 else : print ("Error in Tracking")
 
-with open(CSV_Name+".csv", 'w', newline='', encoding="utf-8") as csv_file :
+with open(CSV_Name+".txt", 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(("Time", "Current"))
     csv_writer.writerows(Tracking)
