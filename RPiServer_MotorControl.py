@@ -347,7 +347,7 @@ First_Time = time.time()
 try :
     Done = False
     print('\033c',end='')
-    print(f'Time Received is {TimeReceived}s\n')
+    print(f'Delay is {TimeReceived - (time.time() - First_Time)}s\n')
     while not Done :
         threading.Thread(target=worker).start()
         print('Server is Up and waiting ...')
