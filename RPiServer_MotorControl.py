@@ -381,7 +381,7 @@ try :
 
 
         elif messageReceived.lower() == 'walk' :
-            Hold(2)
+            Hold(0.4)
 
             messageFromServer = f'Walk Received'
             messageFromServer_bytes = messageFromServer.encode('utf-8')
