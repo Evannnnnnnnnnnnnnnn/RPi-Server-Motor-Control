@@ -31,7 +31,7 @@ Timeout_Time        = 120               # Time allowed to wait before shuting do
 Turn_Motor          = 2.8               # Number of turn for each actions
 Ask_CSV_Name        = True              # If True will ask for the name of the csv where the torque data is stored
 CSV_Name            = "Test"            # Without .csv
-Show_Plot_At_End    = "False"           # If True, show the plot of currnet at the stopping of the programm
+Show_Plot_At_End    = False             # If True, show the plot of currnet at the stopping of the programm
 # -------------------------
 
 # -------------------------     # Dynamixel variables for XM motor
