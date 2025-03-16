@@ -31,6 +31,7 @@ Timeout_Time        = 120               # Time allowed to wait before shuting do
 Turn_Motor          = 2.8               # Number of turn for each actions
 Ask_CSV_Name        = True              # If True will ask for the name of the csv where the torque data is stored
 CSV_Name            = "Test"            # Without .csv
+Show_Plot_At_End    = "False"           # If True, show the plot of currnet at the stopping of the programm
 # -------------------------
 
 # -------------------------     # Dynamixel variables for XM motor
@@ -405,11 +406,12 @@ except KeyboardInterrupt : pass
 
 DXL_Torque_Enable(0) # OFF
 
-if len(Tracking_Current) == len(Tracking_Time): 
-    Tracking = []
-    for Current, Time in zip(Tracking_Time, Tracking_Current) :
-        Tracking.append((Current, Time))
-else : print ("Error in Tracking")
+if len(Tracking_Current) != len(Tracking_Time): 
+    print ("Error in Tracking")
+Tracking = []
+for Current, Time in zip(Tracking_Time, Tracking_Current) :
+    Tracking.append((Current, Time))
+
 
 with open(CSV_Name+".txt", 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer = csv.writer(csv_file)
@@ -417,9 +419,10 @@ with open(CSV_Name+".txt", 'w', newline='', encoding="utf-8") as csv_file :
     csv_writer.writerows(Tracking)
 
 
-# plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
-# print("\nShowing Figure")
-# plt.show()
+if showPlotAtEnd :
+    plt.plot(Tracking_Time, Tracking_Current, linestyle='-', marker='.')
+    print("\nShowing Figure")
+    plt.show()
 
 
 if __name__ == "__main__" :
